@@ -13,7 +13,10 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter((User.username == form.username.data) | (User.email == form.username.data)).first()
-        if user is None or not user.check_password(form.password.data):
+        if user is None:
+            flash('Неверный логин или пароль', 'danger')
+            return redirect(url_for('auth.login'))
+        if not user.check_password(form.password.data):
             flash('Неверный логин или пароль', 'danger')
             return redirect(url_for('auth.login'))
         if not user.is_active:
