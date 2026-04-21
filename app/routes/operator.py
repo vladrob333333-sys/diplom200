@@ -5,7 +5,6 @@ from app.decorators import role_required
 from app.models import User, Service, ClientService, Ticket, Message, Attachment
 from app.forms import ClientRegistrationByOperatorForm, TicketForm, MessageForm
 from app.utils import save_attachment
-import os
 
 bp = Blueprint('operator', __name__)
 
@@ -94,17 +93,20 @@ def ticket_detail(id):
         )
         db.session.add(message)
         db.session.flush()
-        # Сохранить вложения
-        for file in form.attachments.data:
-            if file:
-                unique_name, original_name, file_path = save_attachment(file)
-                attachment = Attachment(
-                    filename=unique_name,
-                    original_name=original_name,
-                    file_path=file_path,
-                    message_id=message.id
-                )
-                db.session.add(attachment)
+        # Обработка вложений (с проверкой на None)
+        attachments = form.attachments.data
+        if attachments:
+            for file in attachments:
+                if file:
+                    unique_name, original_name, file_path = save_attachment(file)
+                    if unique_name:
+                        attachment = Attachment(
+                            filename=unique_name,
+                            original_name=original_name,
+                            file_path=file_path,
+                            message_id=message.id
+                        )
+                        db.session.add(attachment)
         # Обновить статус заявки если нужно
         if ticket.status == 'new':
             ticket.status = 'in_progress'
