@@ -15,7 +15,7 @@ def save_attachment(file):
     return unique_name, file.filename, file_path
 
 def save_image(file):
-    """Сохраняет изображение в uploads и возвращает относительный URL."""
+    """Сохраняет изображение в uploads и возвращает имя файла."""
     if not file:
         return None
     filename = secure_filename(file.filename)
@@ -24,4 +24,4 @@ def save_image(file):
     unique_name = f"{uuid.uuid4().hex}_{filename}"
     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_name)
     file.save(file_path)
-    return 'uploads/' + unique_name
+    return unique_name  # только имя файла, без пути
