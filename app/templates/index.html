@@ -27,13 +27,13 @@
     {% for service in services %}
     <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm">
-            {% if service.image_url %}
-            <img src="{{ service.image_url }}" class="card-img-top" alt="{{ service.name }}" style="height: 200px; object-fit: cover;">
-            {% else %}
-            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
-                <i class="fas fa-cog fa-4x text-white"></i>
-            </div>
-            {% endif %}
+{% if service.image_url %}
+    <img src="{{ url_for('static', filename='uploads/' + service.image_url) }}" class="card-img-top" alt="{{ service.name }}" style="height: 200px; object-fit: cover;">
+{% else %}
+    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+        <i class="fas fa-cog fa-4x text-white"></i>
+    </div>
+{% endif %}
             <div class="card-body">
                 <h5 class="card-title">{{ service.name }}</h5>
                 <p class="card-text">{{ service.description[:150] }}{% if service.description|length > 150 %}...{% endif %}</p>
