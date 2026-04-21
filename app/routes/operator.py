@@ -6,6 +6,7 @@ from app.models import User, Service, ClientService, Ticket, Message, Attachment
 from app.forms import ClientRegistrationByOperatorForm, TicketForm, MessageForm
 from app.utils import save_attachment
 
+
 bp = Blueprint('operator', __name__)
 
 @bp.route('/')
