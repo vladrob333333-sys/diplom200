@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app import db
 from app.decorators import role_required
@@ -48,7 +48,6 @@ def create_ticket():
         )
         db.session.add(ticket)
         db.session.flush()
-        # Обработка вложений с проверкой на None
         attachments = form.attachments.data
         if attachments:
             for file in attachments:
@@ -82,7 +81,6 @@ def ticket_detail(id):
         )
         db.session.add(message)
         db.session.flush()
-        # Обработка вложений с проверкой на None
         attachments = form.attachments.data
         if attachments:
             for file in attachments:
@@ -96,7 +94,6 @@ def ticket_detail(id):
                             message_id=message.id
                         )
                         db.session.add(attachment)
-        # Если заявка ждала ответа клиента, перевести в ожидание оператора
         if ticket.status == 'waiting_client':
             ticket.status = 'waiting_operator'
         db.session.commit()
