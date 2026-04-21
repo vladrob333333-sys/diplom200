@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app import db
 from app.decorators import role_required
-from app.models import User, Service, Category, Ticket
+from app.models import User, Service, Category, Ticket, ClientService
 from app.forms import UserForm, ServiceForm, CategoryForm
 
 bp = Blueprint('admin', __name__)
@@ -19,7 +19,6 @@ def dashboard():
     }
     return render_template('admin/dashboard.html', stats=stats)
 
-# Управление пользователями
 @bp.route('/users')
 @login_required
 @role_required('admin')
@@ -81,7 +80,6 @@ def toggle_user_active(id):
     flash(f'Статус пользователя изменён.', 'success')
     return redirect(url_for('admin.users'))
 
-# Управление услугами
 @bp.route('/services')
 @login_required
 @role_required('admin')
@@ -125,7 +123,6 @@ def edit_service(id):
         return redirect(url_for('admin.services'))
     return render_template('admin/service_form.html', form=form, title='Редактировать услугу')
 
-# Категории
 @bp.route('/categories')
 @login_required
 @role_required('admin')
@@ -165,7 +162,6 @@ def edit_category(id):
         return redirect(url_for('admin.categories'))
     return render_template('admin/category_form.html', form=form, title='Редактировать категорию')
 
-# Заявки
 @bp.route('/tickets')
 @login_required
 @role_required('admin')
@@ -173,6 +169,7 @@ def tickets():
     tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
     return render_template('admin/tickets.html', tickets=tickets)
 
+# Новые маршруты для управления клиентами и их услугами
 @bp.route('/clients')
 @login_required
 @role_required('admin')
