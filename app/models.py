@@ -19,7 +19,7 @@ class User(UserMixin, db.Model):
     contract_number = db.Column(db.String(50), unique=True, nullable=True)  # для клиентов
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
+    role = db.Column(db.String(20), default='client')  # admin, operator, client, executor
     # Связи
     client_services = db.relationship('ClientService', back_populates='client', lazy='dynamic')
     created_tickets = db.relationship('Ticket', foreign_keys='Ticket.client_id', back_populates='client')
@@ -95,6 +95,8 @@ class Ticket(db.Model):
     service = db.relationship('Service', back_populates='tickets')
     messages = db.relationship('Message', back_populates='ticket', order_by='Message.created_at')
     attachments = db.relationship('Attachment', back_populates='ticket', lazy='dynamic')
+    executor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    executor = db.relationship('User', foreign_keys=[executor_id], backref='executed_tickets')
 
     def __repr__(self):
         return f'<Ticket {self.id}: {self.title}>'
