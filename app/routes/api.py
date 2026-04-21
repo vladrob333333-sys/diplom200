@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app.decorators import role_required
 from app.models import Ticket
 from sqlalchemy import func
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 bp = Blueprint('api', __name__)
 
@@ -12,11 +12,15 @@ bp = Blueprint('api', __name__)
 @role_required('admin', 'operator')
 def ticket_stats():
     period = request.args.get('period', 'week')
-    now = datetime.utcnow()
-    if period == 'day': start = now - timedelta(days=1)
-    elif period == 'week': start = now - timedelta(weeks=1)
-    elif period == 'month': start = now - timedelta(days=30)
-    else: start = now - timedelta(weeks=1)
+    now = datetime.now(timezone.utc)
+    if period == 'day':
+        start = now - timedelta(days=1)
+    elif period == 'week':
+        start = now - timedelta(weeks=1)
+    elif period == 'month':
+        start = now - timedelta(days=30)
+    else:
+        start = now - timedelta(weeks=1)
 
     query = Ticket.query.filter(Ticket.created_at >= start)
     if current_user.role == 'operator':
