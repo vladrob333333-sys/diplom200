@@ -3,7 +3,6 @@ from flask import abort
 from flask_login import current_user
 
 def role_required(*roles):
-    """Декоратор для проверки роли пользователя"""
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
