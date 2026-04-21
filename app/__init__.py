@@ -9,6 +9,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import Config
+from sqlalchemy import inspect, text
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -31,6 +32,22 @@ def apply_migrations():
     except Exception as e:
         print(f"Ошибка применения миграций: {e}")
 
+def ensure_executor_column(app):
+    """Проверяет наличие колонки executor_id в таблице tickets и добавляет её, если нет."""
+    with app.app_context():
+        try:
+            # Проверяем, существует ли таблица tickets
+            inspector = inspect(db.engine)
+            if 'tickets' in inspector.get_table_names():
+                columns = [col['name'] for col in inspector.get_columns('tickets')]
+                if 'executor_id' not in columns:
+                    with db.engine.connect() as conn:
+                        conn.execute(text("ALTER TABLE tickets ADD COLUMN executor_id INTEGER REFERENCES users(id)"))
+                        conn.commit()
+                        app.logger.info("Колонка executor_id добавлена в таблицу tickets.")
+        except Exception as e:
+            app.logger.error(f"Ошибка при добавлении колонки executor_id: {e}")
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -43,9 +60,12 @@ def create_app(config_class=Config):
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-    # Автоматическое применение миграций
+    # Попытка автоматического применения миграций
     with app.app_context():
         apply_migrations()
+
+    # Явная проверка и добавление колонки executor_id
+    ensure_executor_column(app)
 
     from app.routes import auth, main, admin, operator, client, executor, api
     app.register_blueprint(auth.bp)
