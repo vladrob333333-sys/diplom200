@@ -37,7 +37,7 @@ def create_app(config_class=Config):
     app.register_blueprint(operator.bp, url_prefix='/operator')
     app.register_blueprint(client.bp, url_prefix='/client')
 
-    # Обработчики ошибок (теперь внутри create_app)
+    # Обработчики ошибок
     @app.errorhandler(403)
     def forbidden(e):
         return render_template('errors/403.html'), 403
@@ -46,23 +46,31 @@ def create_app(config_class=Config):
     def page_not_found(e):
         return render_template('errors/404.html'), 404
 
-    # CLI команда для создания админа
-    @app.cli.command("create-admin")
-    def create_admin():
-        """Создать администратора."""
+    # Инициализация БД и создание администратора при первом запуске
+    with app.app_context():
+        try:
+            # Создаём таблицы, если их нет
+            db.create_all()
+        except Exception as e:
+            app.logger.error(f"DB creation error: {e}")
+
         from app.models import User
-        import getpass
-        username = input("Username: ")
-        email = input("Email: ")
-        password = getpass.getpass("Password: ")
-        with app.app_context():
-            if User.query.filter((User.username == username) | (User.email == email)).first():
-                print("Пользователь уже существует.")
-                return
-            admin = User(username=username, email=email, role='admin')
-            admin.set_password(password)
+        # Проверяем, есть ли хотя бы один администратор
+        admin_exists = User.query.filter_by(role='admin').first()
+        if not admin_exists:
+            admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
+            admin_email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+            admin_password = os.environ.get('ADMIN_PASSWORD', 'Admin123!')
+            admin = User(
+                username=admin_username,
+                email=admin_email,
+                role='admin',
+                full_name='System Administrator',
+                is_active=True
+            )
+            admin.set_password(admin_password)
             db.session.add(admin)
             db.session.commit()
-            print("Администратор создан.")
+            app.logger.info(f"Default admin created: {admin_username} / {admin_password}")
 
     return app
