@@ -101,10 +101,10 @@ def create_service():
             category_id=form.category_id.data,
             is_active=form.is_active.data
         )
-    if form.image.data:
-        image_name = save_image(form.image.data)
-        if image_name:
-            service.image_url = image_name
+        if form.image.data:
+            image_name = save_image(form.image.data)
+            if image_name:
+                service.image_url = image_name
         db.session.add(service)
         db.session.commit()
         flash('Услуга создана.', 'success')
@@ -123,14 +123,14 @@ def edit_service(id):
         service.price = form.price.data
         service.category_id = form.category_id.data
         service.is_active = form.is_active.data
-    if form.image.data:
-        image_name = save_image(form.image.data)
-        if image_name:
-            service.image_url = image_name
+        if form.image.data:
+            image_name = save_image(form.image.data)
+            if image_name:
+                service.image_url = image_name
         db.session.commit()
         flash('Услуга обновлена.', 'success')
         return redirect(url_for('admin.services'))
-    return render_template('admin/service_form.html', form=form, title='Редактировать услугу')
+    return render_template('admin/service_form.html', form=form, title='Редактировать услугу', service=service)
 
 @bp.route('/categories')
 @login_required
