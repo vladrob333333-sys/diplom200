@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Панель исполнителя{% endblock %}
+{% block content %}
+<h2>Панель исполнителя</h2>
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Мои заявки (в работе)</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ assigned_tickets }}</h5>
+                <a href="{{ url_for('executor.tickets') }}" class="text-white">Просмотр →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Доступные заявки</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ available_tickets }}</h5>
+                <a href="{{ url_for('executor.tickets') }}" class="text-white">Просмотр →</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
