@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Панель администратора{% endblock %}
+{% block content %}
+<h2>Панель администратора</h2>
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Пользователи</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.users }}</h5>
+                <a href="{{ url_for('admin.users') }}" class="text-white">Управление →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Услуги</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.services }}</h5>
+                <a href="{{ url_for('admin.services') }}" class="text-white">Управление →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Всего заявок</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.tickets }}</h5>
+                <a href="{{ url_for('admin.tickets') }}" class="text-white">Просмотр →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">Открытых заявок</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.open_tickets }}</h5>
+                <a href="{{ url_for('admin.tickets') }}" class="text-white">Просмотр →</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Быстрые действия</div>
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('admin.create_user') }}" class="list-group-item list-group-item-action">Создать пользователя</a>
+                <a href="{{ url_for('admin.create_service') }}" class="list-group-item list-group-item-action">Добавить услугу</a>
+                <a href="{{ url_for('admin.categories') }}" class="list-group-item list-group-item-action">Управление категориями</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
