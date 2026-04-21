@@ -25,7 +25,16 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
+    
+from flask import render_template
 
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('errors/403.html'), 403
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('errors/404.html'), 404
     # Создание папки uploads
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -56,3 +65,4 @@ def create_app(config_class=Config):
             print("Администратор создан.")
 
     return app
+
