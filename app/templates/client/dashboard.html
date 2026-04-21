@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Личный кабинет{% endblock %}
+{% block content %}
+<h2>Личный кабинет</h2>
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Мои услуги</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ services_count }}</h5>
+                <a href="{{ url_for('client.services') }}" class="text-white">Просмотр →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Открытые заявки</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ open_tickets }}</h5>
+                <a href="{{ url_for('client.tickets') }}" class="text-white">Просмотр →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Техподдержка</div>
+            <div class="card-body">
+                <a href="{{ url_for('client.create_ticket') }}" class="btn btn-light">Создать заявку</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
