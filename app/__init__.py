@@ -10,6 +10,9 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import Config
 from sqlalchemy import inspect, text
+from app.routes import admin_backup
+
+app.register_blueprint(admin_backup.bp)
 
 db = SQLAlchemy()
 migrate = Migrate()
