@@ -20,7 +20,6 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
-    # Связи
     client_services = db.relationship('ClientService', back_populates='client', lazy='dynamic')
     created_tickets = db.relationship('Ticket', foreign_keys='Ticket.client_id', back_populates='client')
     assigned_tickets = db.relationship('Ticket', foreign_keys='Ticket.operator_id', back_populates='operator')
