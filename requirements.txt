@@ -8,6 +8,6 @@ Flask-Limiter==4.0.0
 python-dotenv==1.2.2
 psycopg2-binary==2.9.11
 email-validator==2.1.0
-Flask-Mailing==0.3.0
+Flask-Mailing==3.0.0
 gunicorn==21.2.0
 Pillow==10.2.0
