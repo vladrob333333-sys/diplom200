@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app import db
 from app.decorators import role_required
@@ -44,6 +44,9 @@ def take_ticket(id):
 @role_required('executor')
 def ticket_detail(id):
     ticket = Ticket.query.get_or_404(id)
+    if ticket.executor_id != current_user.id and ticket.executor_id is not None:
+        flash('У вас нет доступа к этой заявке.', 'danger')
+        return redirect(url_for('executor.tickets'))
     form = MessageForm()
     if form.validate_on_submit():
         msg = Message(content=form.content.data, ticket_id=ticket.id, author_id=current_user.id)
