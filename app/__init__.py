@@ -7,6 +7,9 @@ from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import Config
+from app.routes import executor, api
+app.register_blueprint(executor.bp)
+app.register_blueprint(api.bp, url_prefix='/api')
 
 db = SQLAlchemy()
 migrate = Migrate()
