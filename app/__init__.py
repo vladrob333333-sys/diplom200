@@ -11,6 +11,7 @@ from flask_limiter.util import get_remote_address
 from config import Config
 from sqlalchemy import inspect, text
 from app.routes import admin_backup
+from app.routes import auth, main, admin, operator, client, executor, api, admin_backup
 
 db = SQLAlchemy()
 migrate = Migrate()
