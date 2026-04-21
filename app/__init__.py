@@ -7,9 +7,6 @@ from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import Config
-from app.routes import executor, api
-app.register_blueprint(executor.bp)
-app.register_blueprint(api.bp, url_prefix='/api')
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -29,18 +26,17 @@ def create_app(config_class=Config):
     csrf.init_app(app)
     limiter.init_app(app)
 
-    # Создание папки uploads
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-    # Регистрация blueprints
-    from app.routes import auth, main, admin, operator, client
+    from app.routes import auth, main, admin, operator, client, executor, api
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
     app.register_blueprint(admin.bp, url_prefix='/admin')
     app.register_blueprint(operator.bp, url_prefix='/operator')
     app.register_blueprint(client.bp, url_prefix='/client')
+    app.register_blueprint(executor.bp, url_prefix='/executor')
+    app.register_blueprint(api.bp, url_prefix='/api')
 
-    # Обработчики ошибок
     @app.errorhandler(403)
     def forbidden(e):
         return render_template('errors/403.html'), 403
@@ -49,16 +45,13 @@ def create_app(config_class=Config):
     def page_not_found(e):
         return render_template('errors/404.html'), 404
 
-    # Инициализация БД и создание администратора при первом запуске
     with app.app_context():
         try:
-            # Создаём таблицы, если их нет
             db.create_all()
         except Exception as e:
             app.logger.error(f"DB creation error: {e}")
 
         from app.models import User
-        # Проверяем, есть ли хотя бы один администратор
         admin_exists = User.query.filter_by(role='admin').first()
         if not admin_exists:
             admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
@@ -75,5 +68,22 @@ def create_app(config_class=Config):
             db.session.add(admin)
             db.session.commit()
             app.logger.info(f"Default admin created: {admin_username} / {admin_password}")
+
+    @app.cli.command("create-admin")
+    def create_admin():
+        from app.models import User
+        import getpass
+        username = input("Username: ")
+        email = input("Email: ")
+        password = getpass.getpass("Password: ")
+        with app.app_context():
+            if User.query.filter((User.username == username) | (User.email == email)).first():
+                print("Пользователь уже существует.")
+                return
+            admin = User(username=username, email=email, role='admin')
+            admin.set_password(password)
+            db.session.add(admin)
+            db.session.commit()
+            print("Администратор создан.")
 
     return app
