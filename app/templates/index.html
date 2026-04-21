@@ -1,22 +1,75 @@
 {% extends "base.html" %}
-{% block title %}Главная{% endblock %}
+{% block title %}Телеком-магазин - Главная{% endblock %}
 {% block content %}
-<div class="p-5 mb-4 bg-light rounded-3">
+<!-- Hero Section -->
+<div class="p-5 mb-4 bg-primary text-white rounded-3">
     <div class="container-fluid py-5">
         <h1 class="display-5 fw-bold">Телеком-магазин</h1>
         <p class="col-md-8 fs-4">Профессиональные телекоммуникационные решения: оборудование, пожарные и охранные системы, ЛВС.</p>
         {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg">Войти</a>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg">Регистрация</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-light btn-lg">Войти</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg">Регистрация</a>
         {% else %}
             {% if current_user.role == 'admin' %}
-                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-lg">Панель управления</a>
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-light btn-lg">Панель управления</a>
             {% elif current_user.role == 'operator' %}
-                <a href="{{ url_for('operator.dashboard') }}" class="btn btn-primary btn-lg">Панель оператора</a>
+                <a href="{{ url_for('operator.dashboard') }}" class="btn btn-light btn-lg">Панель оператора</a>
             {% else %}
-                <a href="{{ url_for('client.dashboard') }}" class="btn btn-primary btn-lg">Личный кабинет</a>
+                <a href="{{ url_for('client.dashboard') }}" class="btn btn-light btn-lg">Личный кабинет</a>
             {% endif %}
         {% endif %}
+    </div>
+</div>
+
+<!-- Каталог услуг -->
+<h2 class="mb-4">Наши услуги и оборудование</h2>
+<div class="row">
+    {% for service in services %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            {% if service.image_url %}
+            <img src="{{ service.image_url }}" class="card-img-top" alt="{{ service.name }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                <i class="fas fa-cog fa-4x text-white"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ service.name }}</h5>
+                <p class="card-text">{{ service.description[:150] }}{% if service.description|length > 150 %}...{% endif %}</p>
+                <p class="card-text"><strong>Категория:</strong> {{ service.category.name if service.category else 'Без категории' }}</p>
+                {% if service.price %}
+                <p class="card-text"><strong>Цена:</strong> {{ service.price }} руб.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent">
+                <span class="badge bg-success">В наличии</span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">Каталог услуг пока пуст. Зайдите позже.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Дополнительные преимущества -->
+<div class="row mt-5 pt-3">
+    <div class="col-md-4 text-center">
+        <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+        <h3>Надёжность</h3>
+        <p>Современные системы безопасности и контроля доступа.</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+        <h3>Техподдержка 24/7</h3>
+        <p>Оперативная помощь по любым вопросам.</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <i class="fas fa-wifi fa-3x text-primary mb-3"></i>
+        <h3>ЛВС любой сложности</h3>
+        <p>Проектирование и монтаж локальных сетей.</p>
     </div>
 </div>
 {% endblock %}
