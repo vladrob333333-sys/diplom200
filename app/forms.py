@@ -45,6 +45,7 @@ class TicketForm(FlaskForm):
     ], default='normal')
     description = TextAreaField('Описание', validators=[DataRequired()])
     service_id = SelectField('Услуга', coerce=int, validators=[Optional()])
+    client_id = SelectField('Клиент', coerce=int, validators=[Optional()])  # для оператора
     attachments = MultipleFileField('Добавить файл', validators=[
         FileAllowed(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'xls', 'xlsx'], 'Недопустимый тип файла!')
     ])
