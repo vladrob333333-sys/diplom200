@@ -1,9 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app import db
 from app.decorators import role_required
 from app.models import User, Service, ClientService, Ticket, Message, Attachment
-from app.forms import ClientRegistrationByOperatorForm, TicketForm, MessageForm
+from app.forms import ClientRegistrationByOperatorForm, MessageForm
 from app.utils import save_attachment
 
 bp = Blueprint('operator', __name__)
@@ -19,7 +19,6 @@ def dashboard():
     }
     return render_template('operator/dashboard.html', stats=stats)
 
-# Клиенты
 @bp.route('/clients')
 @login_required
 @role_required('operator', 'admin')
@@ -58,7 +57,6 @@ def client_services(id):
         return redirect(url_for('operator.clients'))
     if request.method == 'POST':
         selected_services = request.form.getlist('services')
-        # Удалить старые связи
         ClientService.query.filter_by(client_id=client.id).delete()
         for service_id in selected_services:
             cs = ClientService(client_id=client.id, service_id=int(service_id))
@@ -70,7 +68,6 @@ def client_services(id):
     client_service_ids = [cs.service_id for cs in client.client_services]
     return render_template('operator/client_services.html', client=client, services=services, client_service_ids=client_service_ids)
 
-# Заявки
 @bp.route('/tickets')
 @login_required
 @role_required('operator', 'admin')
@@ -93,7 +90,6 @@ def ticket_detail(id):
         )
         db.session.add(message)
         db.session.flush()
-        # Обработка вложений (с проверкой на None)
         attachments = form.attachments.data
         if attachments:
             for file in attachments:
@@ -107,7 +103,6 @@ def ticket_detail(id):
                             message_id=message.id
                         )
                         db.session.add(attachment)
-        # Обновить статус заявки если нужно
         if ticket.status == 'new':
             ticket.status = 'in_progress'
         if not ticket.operator_id:
@@ -115,7 +110,9 @@ def ticket_detail(id):
         db.session.commit()
         flash('Сообщение отправлено.', 'success')
         return redirect(url_for('operator.ticket_detail', id=ticket.id))
-    return render_template('operator/ticket_detail.html', ticket=ticket, form=form)
+
+    executors = User.query.filter_by(role='executor', is_active=True).all()
+    return render_template('operator/ticket_detail.html', ticket=ticket, form=form, executors=executors)
 
 @bp.route('/tickets/<int:id>/assign')
 @login_required
@@ -135,10 +132,15 @@ def assign_ticket(id):
 def change_status(id):
     ticket = Ticket.query.get_or_404(id)
     new_status = request.form.get('status')
+    executor_id = request.form.get('executor_id')
     if new_status in ['new', 'in_progress', 'waiting_client', 'waiting_operator', 'closed', 'cancelled']:
         ticket.status = new_status
         if new_status == 'closed':
             ticket.resolved_at = db.func.now()
-        db.session.commit()
-        flash('Статус заявки обновлён.', 'success')
+    if executor_id:
+        ticket.executor_id = int(executor_id)
+    else:
+        ticket.executor_id = None
+    db.session.commit()
+    flash('Статус заявки обновлён.', 'success')
     return redirect(url_for('operator.ticket_detail', id=id))
