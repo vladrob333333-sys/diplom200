@@ -15,39 +15,53 @@
     {% block styles %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Телеком-магазин</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if current_user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                {{ current_user.full_name or current_user.username }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                {% if current_user.role == 'admin' %}
-                                    <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Панель администратора</a></li>
-                                {% elif current_user.role == 'operator' %}
-                                    <li><a class="dropdown-item" href="{{ url_for('operator.dashboard') }}">Панель оператора</a></li>
-                                {% else %}
-                                    <li><a class="dropdown-item" href="{{ url_for('client.dashboard') }}">Личный кабинет</a></li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Выйти</a></li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Вход</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a></li>
-                    {% endif %}
-                </ul>
-            </div>
+   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Телеком-магазин</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}">Главная</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}#catalog">Каталог</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            {{ current_user.full_name or current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            {% if current_user.role == 'admin' %}
+                                <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Панель администратора</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.clients') }}">Клиенты</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.services') }}">Услуги</a></li>
+                            {% elif current_user.role == 'operator' %}
+                                <li><a class="dropdown-item" href="{{ url_for('operator.dashboard') }}">Панель оператора</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('operator.clients') }}">Клиенты</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('operator.tickets') }}">Заявки</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{{ url_for('client.dashboard') }}">Личный кабинет</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('client.services') }}">Мои услуги</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('client.tickets') }}">Мои заявки</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Выйти</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Вход</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a></li>
+                {% endif %}
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <main class="container my-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
