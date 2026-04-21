@@ -81,6 +81,7 @@ class Ticket(db.Model):
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     executor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=True)
+    created_by_operator = db.Column(db.Boolean, default=False)  # новое поле
 
     client = db.relationship('User', foreign_keys=[client_id], back_populates='created_tickets')
     operator = db.relationship('User', foreign_keys=[operator_id], back_populates='assigned_tickets')
