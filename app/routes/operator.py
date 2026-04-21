@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.decorators import role_required
 from app.models import User, Service, ClientService, Ticket, Message, Attachment
-from app.forms import ClientRegistrationByOperatorForm, MessageForm
+from app.forms import ClientRegistrationByOperatorForm, TicketForm, MessageForm
 from app.utils import save_attachment
 
 bp = Blueprint('operator', __name__)
@@ -72,8 +72,44 @@ def client_services(id):
 @login_required
 @role_required('operator', 'admin')
 def tickets():
+    # Оператор видит все заявки (можно оставить так или ограничить по operator_id)
     tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
     return render_template('operator/tickets.html', tickets=tickets)
+
+@bp.route('/tickets/create', methods=['GET', 'POST'])
+@login_required
+@role_required('operator', 'admin')
+def create_ticket():
+    form = TicketForm()
+    clients = User.query.filter_by(role='client', is_active=True).order_by(User.full_name).all()
+    form.client_id.choices = [(c.id, f"{c.full_name} ({c.contract_number})") for c in clients]
+    # Услуги можно привязать к выбранному клиенту, но упростим: все активные услуги
+    form.service_id.choices = [(s.id, s.name) for s in Service.query.filter_by(is_active=True).order_by(Service.name).all()]
+    if form.validate_on_submit():
+        client_id = form.client_id.data if form.client_id.data else None
+        ticket = Ticket(
+            title=form.title.data,
+            description=form.description.data,
+            priority=form.priority.data,
+            client_id=client_id,
+            operator_id=current_user.id,
+            service_id=form.service_id.data if form.service_id.data else None,
+            status='new',
+            created_by_operator=True
+        )
+        db.session.add(ticket)
+        db.session.flush()
+        attachments = form.attachments.data
+        if attachments:
+            for file in attachments:
+                if file:
+                    unique_name, original_name, file_path = save_attachment(file)
+                    if unique_name:
+                        db.session.add(Attachment(filename=unique_name, original_name=original_name, file_path=file_path, ticket_id=ticket.id))
+        db.session.commit()
+        flash('Заявка создана.', 'success')
+        return redirect(url_for('operator.tickets'))
+    return render_template('operator/create_ticket.html', form=form)
 
 @bp.route('/tickets/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -96,13 +132,7 @@ def ticket_detail(id):
                 if file:
                     unique_name, original_name, file_path = save_attachment(file)
                     if unique_name:
-                        attachment = Attachment(
-                            filename=unique_name,
-                            original_name=original_name,
-                            file_path=file_path,
-                            message_id=message.id
-                        )
-                        db.session.add(attachment)
+                        db.session.add(Attachment(filename=unique_name, original_name=original_name, file_path=file_path, message_id=message.id))
         if ticket.status == 'new':
             ticket.status = 'in_progress'
         if not ticket.operator_id:
