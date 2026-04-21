@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, MultipleFileField
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, FloatField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, FloatField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
 from app.models import User, Service, Category
 
@@ -86,7 +86,7 @@ class UserForm(FlaskForm):
     full_name = StringField('ФИО', validators=[Optional(), Length(max=120)])
     phone = StringField('Телефон', validators=[Optional(), Length(max=20)])
     contract_number = StringField('Номер договора', validators=[Optional(), Length(max=50)])
-    role = SelectField('Роль', choices=[('client', 'Клиент'), ('operator', 'Оператор'), ('admin', 'Администратор')])
+    role = SelectField('Роль', choices=[('client', 'Клиент'), ('operator', 'Оператор'), ('executor', 'Исполнитель'), ('admin', 'Администратор')])
     is_active = BooleanField('Активен', default=True)
     password = PasswordField('Пароль (оставьте пустым, чтобы не менять)')
     submit = SubmitField('Сохранить')
