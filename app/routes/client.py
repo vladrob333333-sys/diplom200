@@ -50,8 +50,10 @@ def create_ticket():
         db.session.add(ticket)
         db.session.flush()
         # Вложения
-        for file in form.attachments.data:
-            if file:
+        attachments = form.attachments.data
+        if attachments:
+            for file in attachments:
+                if file:
                 unique_name, original_name, file_path = save_attachment(file)
                 attachment = Attachment(
                     filename=unique_name,
