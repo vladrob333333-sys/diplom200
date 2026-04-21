@@ -44,6 +44,7 @@ def take_ticket(id):
 @role_required('executor')
 def ticket_detail(id):
     ticket = Ticket.query.get_or_404(id)
+    # Исполнитель может видеть только свои заявки или свободные
     if ticket.executor_id != current_user.id and ticket.executor_id is not None:
         flash('У вас нет доступа к этой заявке.', 'danger')
         return redirect(url_for('executor.tickets'))
