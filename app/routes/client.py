@@ -5,6 +5,7 @@ from app.decorators import role_required
 from app.models import Service, ClientService, Ticket, Message, Attachment
 from app.forms import TicketForm, MessageForm
 from app.utils import save_attachment
+from app.models import Service, ClientService, Ticket, Message, Attachment
 
 bp = Blueprint('client', __name__)
 
