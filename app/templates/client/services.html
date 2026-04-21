@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Мои услуги{% endblock %}
+{% block content %}
+<h2>Мои услуги</h2>
+<div class="row">
+    {% for cs in client_services %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ cs.service.name }}</h5>
+                <p class="card-text">{{ cs.service.description }}</p>
+                <p class="card-text"><small class="text-muted">Подключена: {{ cs.activated_at.strftime('%d.%m.%Y') }}</small></p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>У вас пока нет подключенных услуг.</p>
+    {% endfor %}
+</div>
+{% endblock %}
