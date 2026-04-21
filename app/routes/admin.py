@@ -93,6 +93,10 @@ def services():
 @role_required('admin')
 def create_service():
     form = ServiceForm()
+    if form.image.data:
+    image_url = save_image(form.image.data)
+    if image_url:
+        service.image_url = image_url
     if form.validate_on_submit():
         service = Service(
             name=form.name.data,
@@ -101,10 +105,6 @@ def create_service():
             category_id=form.category_id.data,
             is_active=form.is_active.data
         )
-        if form.image.data:
-    image_url = save_image(form.image.data)
-    if image_url:
-        service.image_url = image_url
         db.session.add(service)
         db.session.commit()
         flash('Услуга создана.', 'success')
