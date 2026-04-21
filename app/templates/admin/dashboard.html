@@ -12,6 +12,43 @@
             </div>
         </div>
     </div>
+
+    <div class="card mt-4">
+    <div class="card-header">
+        <h5>Статистика заявок</h5>
+        <div class="btn-group">
+            <button class="btn btn-outline-primary btn-sm period-btn" data-period="day">День</button>
+            <button class="btn btn-outline-primary btn-sm period-btn" data-period="week">Неделя</button>
+            <button class="btn btn-outline-primary btn-sm period-btn" data-period="month">Месяц</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <canvas id="ticketsChart" width="400" height="200"></canvas>
+    </div>
+</div>
+<script>
+let chart;
+function loadChart(period) {
+    fetch(`/api/tickets/stats?period=${period}`)
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('ticketsChart').getContext('2d');
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{
+                        data: Object.values(data),
+                        backgroundColor: ['#ff6384','#36a2eb','#cc65fe','#ffce56','#4bc0c0']
+                    }]
+                }
+            });
+        });
+}
+$('.period-btn').click(function(){ loadChart($(this).data('period')); });
+$(document).ready(function(){ loadChart('week'); });
+</script>
     <div class="col-md-3">
         <div class="card text-white bg-success mb-3">
             <div class="card-header">Услуги</div>
