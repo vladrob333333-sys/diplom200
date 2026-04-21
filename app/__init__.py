@@ -1,6 +1,4 @@
 import os
-import subprocess
-import sys
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,8 +8,6 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import Config
 from sqlalchemy import inspect, text
-from app.routes import admin_backup
-from app.routes import auth, main, admin, operator, client, executor, api, admin_backup
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -22,6 +18,7 @@ csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 
 def apply_migrations():
+    """Автоматически применяет миграции Alembic."""
     try:
         from alembic.config import Config
         from alembic import command
@@ -33,8 +30,8 @@ def apply_migrations():
     except Exception as e:
         print(f"Ошибка применения миграций: {e}")
 
-def ensure_columns(app):
-    """Проверяет и добавляет необходимые колонки в БД."""
+def ensure_executor_column(app):
+    """Проверяет наличие колонки executor_id в таблице tickets и добавляет её, если нет."""
     with app.app_context():
         try:
             inspector = inspect(db.engine)
@@ -44,14 +41,9 @@ def ensure_columns(app):
                     with db.engine.connect() as conn:
                         conn.execute(text("ALTER TABLE tickets ADD COLUMN executor_id INTEGER REFERENCES users(id)"))
                         conn.commit()
-                        app.logger.info("Колонка executor_id добавлена.")
-                if 'created_by_operator' not in columns:
-                    with db.engine.connect() as conn:
-                        conn.execute(text("ALTER TABLE tickets ADD COLUMN created_by_operator BOOLEAN DEFAULT FALSE"))
-                        conn.commit()
-                        app.logger.info("Колонка created_by_operator добавлена.")
+                        app.logger.info("Колонка executor_id добавлена в таблицу tickets.")
         except Exception as e:
-            app.logger.error(f"Ошибка при добавлении колонок: {e}")
+            app.logger.error(f"Ошибка при добавлении колонки executor_id: {e}")
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -68,9 +60,17 @@ def create_app(config_class=Config):
     with app.app_context():
         apply_migrations()
 
-    ensure_columns(app)
+    ensure_executor_column(app)
 
+    # Импорт blueprints внутри функции для избежания циклических зависимостей
     from app.routes import auth, main, admin, operator, client, executor, api
+    # admin_backup импортируем отдельно, если файл существует
+    try:
+        from app.routes import admin_backup
+        has_backup = True
+    except ImportError:
+        has_backup = False
+
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
     app.register_blueprint(admin.bp, url_prefix='/admin')
@@ -78,7 +78,8 @@ def create_app(config_class=Config):
     app.register_blueprint(client.bp, url_prefix='/client')
     app.register_blueprint(executor.bp, url_prefix='/executor')
     app.register_blueprint(api.bp, url_prefix='/api')
-    app.register_blueprint(admin_backup.bp)
+    if has_backup:
+        app.register_blueprint(admin_backup.bp)
 
     @app.errorhandler(403)
     def forbidden(e):
