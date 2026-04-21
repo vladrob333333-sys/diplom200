@@ -101,10 +101,10 @@ def create_service():
             category_id=form.category_id.data,
             is_active=form.is_active.data
         )
-        if form.image.data:
-            image_url = save_image(form.image.data)
-            if image_url:
-                service.image_url = image_url
+    if form.image.data:
+        image_name = save_image(form.image.data)
+        if image_name:
+            service.image_url = image_name
         db.session.add(service)
         db.session.commit()
         flash('Услуга создана.', 'success')
