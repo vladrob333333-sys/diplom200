@@ -20,7 +20,6 @@ csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 
 def apply_migrations():
-    """Автоматически применяет миграции Alembic."""
     try:
         from alembic.config import Config
         from alembic import command
@@ -32,11 +31,10 @@ def apply_migrations():
     except Exception as e:
         print(f"Ошибка применения миграций: {e}")
 
-def ensure_executor_column(app):
-    """Проверяет наличие колонки executor_id в таблице tickets и добавляет её, если нет."""
+def ensure_columns(app):
+    """Проверяет и добавляет необходимые колонки в БД."""
     with app.app_context():
         try:
-            # Проверяем, существует ли таблица tickets
             inspector = inspect(db.engine)
             if 'tickets' in inspector.get_table_names():
                 columns = [col['name'] for col in inspector.get_columns('tickets')]
@@ -44,9 +42,14 @@ def ensure_executor_column(app):
                     with db.engine.connect() as conn:
                         conn.execute(text("ALTER TABLE tickets ADD COLUMN executor_id INTEGER REFERENCES users(id)"))
                         conn.commit()
-                        app.logger.info("Колонка executor_id добавлена в таблицу tickets.")
+                        app.logger.info("Колонка executor_id добавлена.")
+                if 'created_by_operator' not in columns:
+                    with db.engine.connect() as conn:
+                        conn.execute(text("ALTER TABLE tickets ADD COLUMN created_by_operator BOOLEAN DEFAULT FALSE"))
+                        conn.commit()
+                        app.logger.info("Колонка created_by_operator добавлена.")
         except Exception as e:
-            app.logger.error(f"Ошибка при добавлении колонки executor_id: {e}")
+            app.logger.error(f"Ошибка при добавлении колонок: {e}")
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -60,12 +63,10 @@ def create_app(config_class=Config):
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-    # Попытка автоматического применения миграций
     with app.app_context():
         apply_migrations()
 
-    # Явная проверка и добавление колонки executor_id
-    ensure_executor_column(app)
+    ensure_columns(app)
 
     from app.routes import auth, main, admin, operator, client, executor, api
     app.register_blueprint(auth.bp)
