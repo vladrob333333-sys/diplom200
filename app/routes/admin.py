@@ -117,6 +117,10 @@ def create_service():
 def edit_service(id):
     service = Service.query.get_or_404(id)
     form = ServiceForm(obj=service)
+    if form.image.data:
+    image_url = save_image(form.image.data)
+    if image_url:
+        service.image_url = image_url
     if form.validate_on_submit():
         service.name = form.name.data
         service.description = form.description.data
