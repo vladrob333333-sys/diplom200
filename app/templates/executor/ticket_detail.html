@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Заявка #{{ ticket.id }}{% endblock %}
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>Заявка #{{ ticket.id }}: {{ ticket.title }}</h4>
+        <span class="badge bg-info">{{ ticket.status }}</span>
+        <span class="badge bg-secondary">{{ ticket.priority }}</span>
+    </div>
+    <div class="card-body">
+        <p><strong>Клиент:</strong> {{ ticket.client.full_name }}</p>
+        <p><strong>Описание:</strong> {{ ticket.description }}</p>
+        {% if ticket.attachments.count() > 0 %}
+        <p><strong>Вложения:</strong>
+            <ul>{% for a in ticket.attachments %}<li><a href="{{ url_for('static', filename='uploads/'+a.filename) }}">{{ a.original_name }}</a></li>{% endfor %}</ul>
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<h5>Переписка</h5>
+<div class="chat-box border rounded p-3 mb-3" style="max-height: 400px; overflow-y: auto;">
+    {% for msg in ticket.messages %}
+        <div class="message mb-2">
+            <strong>
+                {{ msg.author.full_name or msg.author.username }}
+                {% if msg.author.role == 'operator' %}<span class="badge bg-primary">Оператор</span>
+                {% elif msg.author.role == 'client' %}<span class="badge bg-success">Клиент</span>
+                {% elif msg.author.role == 'executor' %}<span class="badge bg-warning text-dark">Исполнитель</span>
+                {% endif %}
+            </strong>
+            <small>{{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+            <p>{{ msg.content }}</p>
+            {% if msg.attachments.count() > 0 %}
+                <small>Вложения:
+                {% for a in msg.attachments %}<a href="{{ url_for('static', filename='uploads/'+a.filename) }}">{{ a.original_name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+                </small>
+            {% endif %}
+        </div>
+        <hr>
+    {% endfor %}
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">{{ form.content.label }} {{ form.content(class="form-control", rows=3) }}</div>
+    <div class="mb-3">{{ form.attachments.label }} {{ form.attachments(class="form-control", multiple=True) }}</div>
+    {{ form.submit(class="btn btn-success") }}
+    <a href="{{ url_for('executor.tickets') }}" class="btn btn-secondary">Назад</a>
+</form>
+{% endblock %}
