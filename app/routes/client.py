@@ -36,7 +36,7 @@ def create_ticket():
                         filename=unique_name,
                         original_name=original_name,
                         file_path=file_path,
-                        ticket_id=ticket.id
+                        message_id=message.id
                     )
                     db.session.add(attachment)
         db.session.commit()
