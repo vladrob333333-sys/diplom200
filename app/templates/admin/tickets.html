@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Все заявки{% endblock %}
+{% block content %}
+<h2>Все заявки</h2>
+<table id="tickets-table" class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Дата</th>
+            <th>Клиент</th>
+            <th>Тема</th>
+            <th>Статус</th>
+            <th>Приоритет</th>
+            <th>Оператор</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in tickets %}
+        <tr>
+            <td>{{ t.id }}</td>
+            <td>{{ t.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            <td>{{ t.client.full_name }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.status }}</td>
+            <td>{{ t.priority }}</td>
+            <td>{{ t.operator.full_name if t.operator else '—' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#tickets-table').DataTable({
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ru.json' },
+        order: [[1, 'desc']]
+    });
+});
+</script>
+{% endblock %}
