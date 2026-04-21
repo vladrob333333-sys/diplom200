@@ -123,10 +123,10 @@ def edit_service(id):
         service.price = form.price.data
         service.category_id = form.category_id.data
         service.is_active = form.is_active.data
-        if form.image.data:
-            image_url = save_image(form.image.data)
-            if image_url:
-                service.image_url = image_url
+    if form.image.data:
+        image_name = save_image(form.image.data)
+        if image_name:
+            service.image_url = image_name
         db.session.commit()
         flash('Услуга обновлена.', 'success')
         return redirect(url_for('admin.services'))
