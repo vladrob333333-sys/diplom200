@@ -38,25 +38,37 @@ def get_table_data():
 def restore_from_data(data):
     """Восстанавливает данные из словаря (удаляет существующие и вставляет новые)."""
     metadata = MetaData()
-    # Удаляем данные в порядке обратном зависимостям (грубо, но для демо сойдёт)
-    # Лучше использовать транзакцию и отключить проверку внешних ключей
+    # Порядок таблиц для удаления с учётом зависимостей
+    table_order = [
+        'attachments',
+        'messages',
+        'client_services',
+        'tickets',
+        'services',
+        'categories',
+        'users'
+    ]
     with db.engine.connect() as conn:
-        # Отключаем проверку внешних ключей (для PostgreSQL)
-        if 'postgresql' in db.engine.url.drivername:
-            conn.execute(db.text("SET session_replication_role = 'replica';"))
-        else:
+        # Отключаем проверку внешних ключей для SQLite
+        if 'sqlite' in db.engine.url.drivername:
             conn.execute(db.text("PRAGMA foreign_keys = OFF;"))
         try:
-            for table_name, rows in data.items():
-                table = Table(table_name, metadata, autoload_with=db.engine)
-                conn.execute(table.delete())
-                if rows:
-                    conn.execute(table.insert(), rows)
+            # Удаляем данные в порядке обратном зависимостям
+            for table_name in table_order:
+                if table_name in data:
+                    table = Table(table_name, metadata, autoload_with=db.engine)
+                    conn.execute(table.delete())
+            # Вставляем данные
+            for table_name in table_order:
+                if table_name in data and data[table_name]:
+                    table = Table(table_name, metadata, autoload_with=db.engine)
+                    conn.execute(table.insert(), data[table_name])
             conn.commit()
+        except Exception as e:
+            conn.rollback()
+            raise e
         finally:
-            if 'postgresql' in db.engine.url.drivername:
-                conn.execute(db.text("SET session_replication_role = 'origin';"))
-            else:
+            if 'sqlite' in db.engine.url.drivername:
                 conn.execute(db.text("PRAGMA foreign_keys = ON;"))
 
 @bp.route('/')
