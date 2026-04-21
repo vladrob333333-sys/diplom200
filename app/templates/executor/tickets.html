@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Заявки{% endblock %}
+{% block content %}
+<h2>Мои заявки</h2>
+<table class="table table-striped">
+    <thead>
+        <tr><th>ID</th><th>Тема</th><th>Статус</th><th>Приоритет</th><th>Клиент</th><th>Действия</th></tr>
+    </thead>
+    <tbody>
+        {% for t in my_tickets %}
+        <tr>
+            <td>{{ t.id }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.status }}</td>
+            <td>{{ t.priority }}</td>
+            <td>{{ t.client.full_name }}</td>
+            <td><a href="{{ url_for('executor.ticket_detail', id=t.id) }}" class="btn btn-sm btn-outline-primary">Открыть</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2 class="mt-5">Доступные заявки</h2>
+<table class="table table-striped">
+    <thead>
+        <tr><th>ID</th><th>Тема</th><th>Статус</th><th>Приоритет</th><th>Клиент</th><th>Действия</th></tr>
+    </thead>
+    <tbody>
+        {% for t in available %}
+        <tr>
+            <td>{{ t.id }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.status }}</td>
+            <td>{{ t.priority }}</td>
+            <td>{{ t.client.full_name }}</td>
+            <td>
+                <a href="{{ url_for('executor.take_ticket', id=t.id) }}" class="btn btn-sm btn-success">Принять</a>
+                <a href="{{ url_for('executor.ticket_detail', id=t.id) }}" class="btn btn-sm btn-outline-secondary">Просмотр</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
