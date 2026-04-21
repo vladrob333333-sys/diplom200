@@ -100,3 +100,27 @@ def ticket_detail(id):
         flash('Сообщение отправлено.', 'success')
         return redirect(url_for('client.ticket_detail', id=ticket.id))
     return render_template('client/ticket_detail.html', ticket=ticket, form=form)
+
+@bp.route('/order/<int:service_id>', methods=['POST'])
+@login_required
+@role_required('client')
+def order_service(service_id):
+    service = Service.query.get_or_404(service_id)
+    # Проверим, не подключена ли уже услуга
+    existing = ClientService.query.filter_by(client_id=current_user.id, service_id=service_id).first()
+    if existing:
+        flash('У вас уже подключена эта услуга.', 'info')
+        return redirect(url_for('main.index', _anchor='catalog'))
+    # Создаём заявку на подключение
+    ticket = Ticket(
+        title=f"Заказ услуги: {service.name}",
+        description=f"Клиент заказал подключение услуги \"{service.name}\".",
+        priority='normal',
+        client_id=current_user.id,
+        service_id=service.id,
+        status='new'
+    )
+    db.session.add(ticket)
+    db.session.commit()
+    flash('Заявка на подключение услуги создана. Ожидайте обработки.', 'success')
+    return redirect(url_for('client.tickets'))
