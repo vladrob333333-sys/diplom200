@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Панель оператора{% endblock %}
+{% block content %}
+<h2>Панель оператора</h2>
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Клиенты</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.clients }}</h5>
+                <a href="{{ url_for('operator.clients') }}" class="text-white">Управление →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Открытые заявки</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.open_tickets }}</h5>
+                <a href="{{ url_for('operator.tickets') }}" class="text-white">Просмотр →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Мои заявки</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.my_tickets }}</h5>
+                <a href="{{ url_for('operator.tickets') }}" class="text-white">Просмотр →</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Действия</div>
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('operator.create_client') }}" class="list-group-item list-group-item-action">Зарегистрировать клиента</a>
+                <a href="{{ url_for('operator.tickets') }}" class="list-group-item list-group-item-action">Все заявки</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
