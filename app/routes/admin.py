@@ -172,3 +172,31 @@ def edit_category(id):
 def tickets():
     tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
     return render_template('admin/tickets.html', tickets=tickets)
+
+@bp.route('/clients')
+@login_required
+@role_required('admin')
+def clients():
+    clients = User.query.filter_by(role='client').order_by(User.created_at.desc()).all()
+    return render_template('admin/clients.html', clients=clients)
+
+@bp.route('/clients/<int:id>/services', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def client_services(id):
+    client = User.query.get_or_404(id)
+    if client.role != 'client':
+        flash('Пользователь не является клиентом.', 'danger')
+        return redirect(url_for('admin.clients'))
+    if request.method == 'POST':
+        selected_services = request.form.getlist('services')
+        ClientService.query.filter_by(client_id=client.id).delete()
+        for service_id in selected_services:
+            cs = ClientService(client_id=client.id, service_id=int(service_id))
+            db.session.add(cs)
+        db.session.commit()
+        flash('Услуги клиента обновлены.', 'success')
+        return redirect(url_for('admin.client_services', id=client.id))
+    services = Service.query.filter_by(is_active=True).order_by(Service.name).all()
+    client_service_ids = [cs.service_id for cs in client.client_services]
+    return render_template('admin/client_services.html', client=client, services=services, client_service_ids=client_service_ids)
