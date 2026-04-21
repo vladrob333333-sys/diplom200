@@ -24,7 +24,7 @@
             </ul>
         </p>
         {% endif %}
-        <p><strong>Ответственный:</strong> {{ ticket.operator.full_name if ticket.operator else 'Не назначен' }}
+        <p><strong>Ответственный оператор:</strong> {{ ticket.operator.full_name if ticket.operator else 'Не назначен' }}
             {% if not ticket.operator_id %}
                 <a href="{{ url_for('operator.assign_ticket', id=ticket.id) }}" class="btn btn-sm btn-outline-success ms-2">Назначить на меня</a>
             {% endif %}
@@ -42,7 +42,15 @@
                 </select>
             </div>
             <div class="col-auto">
-                <button type="submit" class="btn btn-sm btn-primary">Сменить статус</button>
+                <select name="executor_id" class="form-select form-select-sm">
+                    <option value="">Без исполнителя</option>
+                    {% for e in executors %}
+                        <option value="{{ e.id }}" {% if ticket.executor_id == e.id %}selected{% endif %}>{{ e.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-primary">Применить</button>
             </div>
         </form>
     </div>
@@ -52,7 +60,14 @@
 <div class="chat-box border rounded p-3 mb-3" style="max-height: 400px; overflow-y: auto;">
     {% for msg in ticket.messages %}
         <div class="message mb-2 {% if msg.is_operator_reply %}text-primary{% endif %}">
-            <strong>{{ msg.author.full_name or msg.author.username }}</strong>
+            <strong>
+                {{ msg.author.full_name or msg.author.username }}
+                {% if msg.author.role == 'operator' %}<span class="badge bg-primary">Оператор</span>
+                {% elif msg.author.role == 'client' %}<span class="badge bg-success">Клиент</span>
+                {% elif msg.author.role == 'executor' %}<span class="badge bg-warning text-dark">Исполнитель</span>
+                {% else %}<span class="badge bg-secondary">{{ msg.author.role }}</span>
+                {% endif %}
+            </strong>
             <small class="text-muted">{{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
             <p class="mb-1">{{ msg.content }}</p>
             {% if msg.attachments.count() > 0 %}
