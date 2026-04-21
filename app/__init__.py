@@ -1,4 +1,6 @@
 import os
+import subprocess
+import sys
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -16,6 +18,19 @@ login_manager.login_message = 'Пожалуйста, войдите для до�
 csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 
+def apply_migrations():
+    """Автоматически применяет миграции Alembic."""
+    try:
+        from alembic.config import Config
+        from alembic import command
+        alembic_ini_path = os.path.join(os.getcwd(), 'migrations', 'alembic.ini')
+        if os.path.exists(alembic_ini_path):
+            alembic_cfg = Config(alembic_ini_path)
+            command.upgrade(alembic_cfg, "head")
+            print("Миграции успешно применены.")
+    except Exception as e:
+        print(f"Ошибка применения миграций: {e}")
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -27,6 +42,10 @@ def create_app(config_class=Config):
     limiter.init_app(app)
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+    # Автоматическое применение миграций
+    with app.app_context():
+        apply_migrations()
 
     from app.routes import auth, main, admin, operator, client, executor, api
     app.register_blueprint(auth.bp)
