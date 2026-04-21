@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -25,19 +25,11 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
-    
-from flask import render_template
 
-@app.errorhandler(403)
-def forbidden(e):
-    return render_template('errors/403.html'), 403
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('errors/404.html'), 404
     # Создание папки uploads
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+    # Регистрация blueprints
     from app.routes import auth, main, admin, operator, client
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
@@ -45,7 +37,16 @@ def page_not_found(e):
     app.register_blueprint(operator.bp, url_prefix='/operator')
     app.register_blueprint(client.bp, url_prefix='/client')
 
-    # Команда для создания админа
+    # Обработчики ошибок (теперь внутри create_app)
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template('errors/403.html'), 403
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('errors/404.html'), 404
+
+    # CLI команда для создания админа
     @app.cli.command("create-admin")
     def create_admin():
         """Создать администратора."""
@@ -65,4 +66,3 @@ def page_not_found(e):
             print("Администратор создан.")
 
     return app
-
