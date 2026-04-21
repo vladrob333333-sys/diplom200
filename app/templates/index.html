@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Телеком-магазин - Главная{% endblock %}
 {% block content %}
-<!-- Hero Section -->
 <div class="p-5 mb-4 bg-primary text-white rounded-3">
     <div class="container-fluid py-5">
         <h1 class="display-5 fw-bold">Телеком-магазин</h1>
@@ -14,6 +13,8 @@
                 <a href="{{ url_for('admin.dashboard') }}" class="btn btn-light btn-lg">Панель управления</a>
             {% elif current_user.role == 'operator' %}
                 <a href="{{ url_for('operator.dashboard') }}" class="btn btn-light btn-lg">Панель оператора</a>
+            {% elif current_user.role == 'executor' %}
+                <a href="{{ url_for('executor.dashboard') }}" class="btn btn-light btn-lg">Панель исполнителя</a>
             {% else %}
                 <a href="{{ url_for('client.dashboard') }}" class="btn btn-light btn-lg">Личный кабинет</a>
             {% endif %}
@@ -21,8 +22,7 @@
     </div>
 </div>
 
-<!-- Каталог услуг -->
-<h2 class="mb-4">Наши услуги и оборудование</h2>
+<h2 id="catalog" class="mb-4">Наши услуги и оборудование</h2>
 <div class="row">
     {% for service in services %}
     <div class="col-md-4 mb-4">
@@ -54,7 +54,6 @@
     {% endfor %}
 </div>
 
-<!-- Дополнительные преимущества -->
 <div class="row mt-5 pt-3">
     <div class="col-md-4 text-center">
         <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
