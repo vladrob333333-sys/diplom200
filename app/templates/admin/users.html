@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Пользователи{% endblock %}
+{% block content %}
+<h2>Пользователи</h2>
+<a href="{{ url_for('admin.create_user') }}" class="btn btn-primary mb-3"><i class="fas fa-plus"></i> Создать</a>
+<table id="users-table" class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Логин</th>
+            <th>Email</th>
+            <th>ФИО</th>
+            <th>Роль</th>
+            <th>Активен</th>
+            <th>Дата регистрации</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.role }}</td>
+            <td>{% if user.is_active %}Да{% else %}Нет{% endif %}</td>
+            <td>{{ user.created_at.strftime('%d.%m.%Y') }}</td>
+            <td>
+                <a href="{{ url_for('admin.edit_user', id=user.id) }}" class="btn btn-sm btn-outline-primary">Ред.</a>
+                <a href="{{ url_for('admin.toggle_user_active', id=user.id) }}" class="btn btn-sm btn-outline-warning">
+                    {% if user.is_active %}Блок.{% else %}Акт.{% endif %}
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#users-table').DataTable({
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ru.json' }
+    });
+});
+</script>
+{% endblock %}
