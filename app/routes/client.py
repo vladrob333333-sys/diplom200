@@ -8,48 +8,33 @@ from app.utils import save_attachment
 
 bp = Blueprint('client', __name__)
 
-@bp.route('/tickets/create', methods=['GET', 'POST'])
+@bp.route('/')
 @login_required
 @role_required('client')
-def create_ticket():
-    form = TicketForm()
+def dashboard():
+    services_count = ClientService.query.filter_by(client_id=current_user.id).count()
+    open_tickets = Ticket.query.filter_by(client_id=current_user.id).filter(Ticket.status != 'closed').count()
+    return render_template('client/dashboard.html', services_count=services_count, open_tickets=open_tickets)
+
+@bp.route('/services')
+@login_required
+@role_required('client')
+def services():
     client_services = ClientService.query.filter_by(client_id=current_user.id).join(Service).filter(Service.is_active == True).all()
-    form.service_id.choices = [(cs.service.id, cs.service.name) for cs in client_services]
-    if form.validate_on_submit():
-        ticket = Ticket(
-            title=form.title.data,
-            description=form.description.data,
-            priority=form.priority.data,
-            client_id=current_user.id,
-            service_id=form.service_id.data if form.service_id.data else None,
-            status='new'
-        )
-        db.session.add(ticket)
-        db.session.flush()
-        # Вложения (с проверкой на None)
-        attachments = form.attachments.data
-        if attachments:
-            for file in attachments:
-                if file:
-                    unique_name, original_name, file_path = save_attachment(file)
-                    attachment = Attachment(
-                        filename=unique_name,
-                        original_name=original_name,
-                        file_path=file_path,
-                        message_id=message.id
-                    )
-                    db.session.add(attachment)
-        db.session.commit()
-        flash('Заявка создана.', 'success')
-        return redirect(url_for('client.tickets'))
-    return render_template('client/create_ticket.html', form=form)
+    return render_template('client/services.html', client_services=client_services)
+
+@bp.route('/tickets')
+@login_required
+@role_required('client')
+def tickets():
+    tickets = Ticket.query.filter_by(client_id=current_user.id).order_by(Ticket.created_at.desc()).all()
+    return render_template('client/tickets.html', tickets=tickets)
 
 @bp.route('/tickets/create', methods=['GET', 'POST'])
 @login_required
 @role_required('client')
 def create_ticket():
     form = TicketForm()
-    # Заполнить список услуг клиента
     client_services = ClientService.query.filter_by(client_id=current_user.id).join(Service).filter(Service.is_active == True).all()
     form.service_id.choices = [(cs.service.id, cs.service.name) for cs in client_services]
     if form.validate_on_submit():
@@ -63,19 +48,20 @@ def create_ticket():
         )
         db.session.add(ticket)
         db.session.flush()
-        # Вложения
+        # Обработка вложений с проверкой на None
         attachments = form.attachments.data
         if attachments:
             for file in attachments:
                 if file:
-                unique_name, original_name, file_path = save_attachment(file)
-                attachment = Attachment(
-                    filename=unique_name,
-                    original_name=original_name,
-                    file_path=file_path,
-                    ticket_id=ticket.id
-                )
-                db.session.add(attachment)
+                    unique_name, original_name, file_path = save_attachment(file)
+                    if unique_name:
+                        attachment = Attachment(
+                            filename=unique_name,
+                            original_name=original_name,
+                            file_path=file_path,
+                            ticket_id=ticket.id
+                        )
+                        db.session.add(attachment)
         db.session.commit()
         flash('Заявка создана.', 'success')
         return redirect(url_for('client.tickets'))
@@ -96,16 +82,20 @@ def ticket_detail(id):
         )
         db.session.add(message)
         db.session.flush()
-        for file in form.attachments.data:
-            if file:
-                unique_name, original_name, file_path = save_attachment(file)
-                attachment = Attachment(
-                    filename=unique_name,
-                    original_name=original_name,
-                    file_path=file_path,
-                    message_id=message.id
-                )
-                db.session.add(attachment)
+        # Обработка вложений с проверкой на None
+        attachments = form.attachments.data
+        if attachments:
+            for file in attachments:
+                if file:
+                    unique_name, original_name, file_path = save_attachment(file)
+                    if unique_name:
+                        attachment = Attachment(
+                            filename=unique_name,
+                            original_name=original_name,
+                            file_path=file_path,
+                            message_id=message.id
+                        )
+                        db.session.add(attachment)
         # Если заявка ждала ответа клиента, перевести в ожидание оператора
         if ticket.status == 'waiting_client':
             ticket.status = 'waiting_operator'
