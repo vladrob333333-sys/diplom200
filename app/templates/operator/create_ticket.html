@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Создание заявки оператором{% endblock %}
+{% block content %}
+<h2>Создать заявку</h2>
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+        {{ form.title.label(class="form-label") }}
+        {{ form.title(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.client_id.label(class="form-label") }}
+        {{ form.client_id(class="form-select") }}
+    </div>
+    <div class="mb-3">
+        {{ form.service_id.label(class="form-label") }}
+        {{ form.service_id(class="form-select") }}
+    </div>
+    <div class="mb-3">
+        {{ form.priority.label(class="form-label") }}
+        {{ form.priority(class="form-select") }}
+    </div>
+    <div class="mb-3">
+        {{ form.description.label(class="form-label") }}
+        {{ form.description(class="form-control", rows=6) }}
+    </div>
+    <div class="mb-3">
+        {{ form.attachments.label(class="form-label") }}
+        {{ form.attachments(class="form-control", multiple=True) }}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+    <a href="{{ url_for('operator.tickets') }}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}
