@@ -12,8 +12,6 @@ from config import Config
 from sqlalchemy import inspect, text
 from app.routes import admin_backup
 
-app.register_blueprint(admin_backup.bp)
-
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
@@ -79,6 +77,7 @@ def create_app(config_class=Config):
     app.register_blueprint(client.bp, url_prefix='/client')
     app.register_blueprint(executor.bp, url_prefix='/executor')
     app.register_blueprint(api.bp, url_prefix='/api')
+    app.register_blueprint(admin_backup.bp)
 
     @app.errorhandler(403)
     def forbidden(e):
