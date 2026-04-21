@@ -42,12 +42,12 @@
                 </select>
             </div>
             <div class="col-auto">
-                <select name="executor_id" class="form-select form-select-sm">
-                    <option value="">Без исполнителя</option>
-                    {% for e in executors %}
-                        <option value="{{ e.id }}" {% if ticket.executor_id == e.id %}selected{% endif %}>{{ e.full_name }}</option>
-                    {% endfor %}
-                </select>
+<select name="executor_id" class="form-select form-select-sm">
+    <option value="">Без исполнителя</option>
+    {% for e in executors %}
+        <option value="{{ e.id }}" {% if ticket.executor_id == e.id %}selected{% endif %}>{{ e.full_name }}</option>
+    {% endfor %}
+</select>
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-sm btn-primary">Применить</button>
