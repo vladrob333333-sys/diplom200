@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Резервное копирование{% endblock %}
+{% block content %}
+<h2>Резервное копирование базы данных</h2>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Создать бэкап</div>
+            <div class="card-body">
+                <p>Скачайте полную копию базы данных и загруженных файлов.</p>
+                <a href="{{ url_for('admin_backup.create_backup') }}" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Скачать бэкап
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Восстановить из бэкапа</div>
+            <div class="card-body">
+                <p>Загрузите ранее созданный ZIP-архив. <strong class="text-danger">Внимание: все текущие данные будут заменены!</strong></p>
+                <form method="POST" action="{{ url_for('admin_backup.restore_backup') }}" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <input type="file" name="backup_file" class="form-control" accept=".zip" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-upload"></i> Восстановить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
