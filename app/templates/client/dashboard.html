@@ -1,33 +1,124 @@
 {% extends "base.html" %}
 {% block title %}Личный кабинет{% endblock %}
+{% block styles %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .stat-card {
+        background: white;
+        border: none;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        border-left: 4px solid #10b981;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    }
+    .stat-value {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #1e293b;
+    }
+    .stat-label {
+        color: #64748b;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .action-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        text-align: center;
+        transition: all 0.2s;
+        text-decoration: none;
+        color: #1e293b;
+        display: block;
+        height: 100%;
+    }
+    .action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        color: #10b981;
+    }
+    .action-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #10b981;
+    }
+    .welcome-text {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Личный кабинет</h2>
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-header">Мои услуги</div>
-            <div class="card-body">
-                <h5 class="card-title">{{ services_count }}</h5>
-                <a href="{{ url_for('client.services') }}" class="text-white">Просмотр →</a>
-            </div>
+<div class="dashboard-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="text-white-50 mb-2">Личный кабинет</div>
+            <div class="welcome-text">Здравствуйте, {{ current_user.full_name or current_user.username }}!</div>
+            <p class="opacity-75">Договор №{{ current_user.contract_number }}</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <span class="badge bg-light text-dark px-4 py-2 rounded-pill">
+                <i class="fas fa-calendar-alt me-2"></i>{{ now().strftime('%d.%m.%Y') if now else '' }}
+            </span>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-header">Открытые заявки</div>
-            <div class="card-body">
-                <h5 class="card-title">{{ open_tickets }}</h5>
-                <a href="{{ url_for('client.tickets') }}" class="text-white">Просмотр →</a>
-            </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-cubes me-2"></i>Мои услуги</div>
+            <div class="stat-value">{{ services_count }}</div>
+            <a href="{{ url_for('client.services') }}" class="stretched-link"></a>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-header">Техподдержка</div>
-            <div class="card-body">
-                <a href="{{ url_for('client.create_ticket') }}" class="btn btn-light">Создать заявку</a>
-            </div>
+    <div class="col-md-6">
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-ticket-alt me-2"></i>Открытые заявки</div>
+            <div class="stat-value">{{ open_tickets }}</div>
+            <a href="{{ url_for('client.tickets') }}" class="stretched-link"></a>
         </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <a href="{{ url_for('client.create_ticket') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
+            <h5>Создать заявку</h5>
+            <p class="text-muted mb-0">Обратиться в техподдержку</p>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('client.tickets') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-history"></i></div>
+            <h5>История заявок</h5>
+            <p class="text-muted mb-0">Просмотр всех обращений</p>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('main.index', _anchor='catalog') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-store"></i></div>
+            <h5>Каталог услуг</h5>
+            <p class="text-muted mb-0">Заказать новые услуги</p>
+        </a>
     </div>
 </div>
 {% endblock %}
