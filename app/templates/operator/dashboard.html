@@ -19,10 +19,14 @@
         transition: transform 0.2s, box-shadow 0.2s;
         height: 100%;
         border-left: 4px solid transparent;
+        text-decoration: none;
+        color: inherit;
+        display: block;
     }
     .stat-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        color: inherit;
     }
     .stat-card.clients { border-left-color: #3b82f6; }
     .stat-card.open { border-left-color: #f59e0b; }
@@ -87,7 +91,7 @@
         </div>
         <div class="col-md-4 text-md-end">
             <span class="badge bg-light text-dark px-4 py-2 rounded-pill">
-                <i class="fas fa-calendar-alt me-2"></i>{{ now().strftime('%d.%m.%Y') if now else '' }}
+                <i class="fas fa-calendar-alt me-2"></i>{{ now().strftime('%d.%m.%Y') }}
             </span>
         </div>
     </div>
@@ -95,25 +99,22 @@
 
 <div class="row g-4 mb-5">
     <div class="col-md-4">
-        <div class="stat-card clients">
+        <a href="{{ url_for('operator.clients') }}" class="stat-card clients">
             <div class="stat-label"><i class="fas fa-users me-2"></i>Клиенты</div>
             <div class="stat-value">{{ stats.clients }}</div>
-            <a href="{{ url_for('operator.clients') }}" class="stretched-link"></a>
-        </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="stat-card open">
+        <a href="{{ url_for('operator.tickets') }}" class="stat-card open">
             <div class="stat-label"><i class="fas fa-ticket-alt me-2"></i>Открытые заявки</div>
             <div class="stat-value">{{ stats.open_tickets }}</div>
-            <a href="{{ url_for('operator.tickets') }}" class="stretched-link"></a>
-        </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="stat-card my">
+        <a href="{{ url_for('operator.tickets') }}" class="stat-card my">
             <div class="stat-label"><i class="fas fa-user-check me-2"></i>Мои заявки</div>
             <div class="stat-value">{{ stats.my_tickets }}</div>
-            <a href="{{ url_for('operator.tickets') }}" class="stretched-link"></a>
-        </div>
+        </a>
     </div>
 </div>
 
