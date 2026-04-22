@@ -1,7 +1,103 @@
 {% extends "base.html" %}
 {% block title %}Панель администратора{% endblock %}
+{% block styles %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .stat-card {
+        background: white;
+        border: none;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        border-left: 4px solid transparent;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        color: inherit;
+    }
+    .stat-card.users { border-left-color: #3b82f6; }
+    .stat-card.services { border-left-color: #10b981; }
+    .stat-card.total { border-left-color: #f59e0b; }
+    .stat-card.open { border-left-color: #ef4444; }
+    .stat-value {
+        font-size: 2.8rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-label {
+        color: #64748b;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .quick-actions {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 1.5rem;
+    }
+    .chart-container {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .action-btn {
+        display: block;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        color: #1e293b;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background: #f8fafc;
+        border-color: #1e293b;
+        color: #1e293b;
+    }
+    .welcome-text {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .period-selector .btn {
+        border-radius: 2rem;
+        padding: 0.375rem 1.25rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Панель администратора</h2>
+<div class="dashboard-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="text-white-50 mb-2">Панель администратора</div>
+            <div class="welcome-text">Здравствуйте, {{ current_user.full_name or current_user.username }}!</div>
+            <p class="opacity-75">Полное управление системой</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <span class="badge bg-light text-dark px-4 py-2 rounded-pill">
+                <i class="fas fa-calendar-alt me-2"></i>{{ now().strftime('%d.%m.%Y') }}
+            </span>
+        </div>
+    </div>
+</div>
+
 <div class="row g-4 mb-5">
     <div class="col-md-3">
         <a href="{{ url_for('admin.users') }}" class="stat-card users">
@@ -28,32 +124,48 @@
         </a>
     </div>
 </div>
-<div class="row mt-3">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">Быстрые действия</div>
-            <div class="list-group list-group-flush">
-                <a href="{{ url_for('admin.create_user') }}" class="list-group-item list-group-item-action">Создать пользователя</a>
-                <a href="{{ url_for('admin.create_service') }}" class="list-group-item list-group-item-action">Добавить услугу</a>
-                <a href="{{ url_for('admin.categories') }}" class="list-group-item list-group-item-action">Управление категориями</a>
+
+<div class="row">
+    <div class="col-lg-5">
+        <div class="quick-actions">
+            <h5 class="mb-3"><i class="fas fa-bolt me-2 text-primary"></i>Быстрые действия</h5>
+            <a href="{{ url_for('admin.create_user') }}" class="action-btn">
+                <i class="fas fa-user-plus me-3 text-primary"></i>Создать пользователя
+            </a>
+            <a href="{{ url_for('admin.create_service') }}" class="action-btn">
+                <i class="fas fa-plus-circle me-3 text-primary"></i>Добавить услугу
+            </a>
+            <a href="{{ url_for('admin.categories') }}" class="action-btn">
+                <i class="fas fa-folder me-3 text-primary"></i>Управление категориями
+            </a>
+            <a href="{{ url_for('admin.clients') }}" class="action-btn">
+                <i class="fas fa-user-tie me-3 text-primary"></i>Клиенты
+            </a>
+            {% if has_backup %}
+            <a href="{{ url_for('admin_backup.index') }}" class="action-btn">
+                <i class="fas fa-database me-3 text-primary"></i>Резервное копирование
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Статистика заявок</h5>
+                <div class="period-selector btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary period-btn" data-period="day">День</button>
+                    <button class="btn btn-outline-primary period-btn active" data-period="week">Неделя</button>
+                    <button class="btn btn-outline-primary period-btn" data-period="month">Месяц</button>
+                </div>
+            </div>
+            <div style="max-width: 350px; margin: 0 auto;">
+                <canvas id="ticketsChart" width="200" height="200" style="max-height: 220px;"></canvas>
             </div>
         </div>
     </div>
 </div>
-<div class="card mt-4">
-    <div class="card-header">
-        <h5>Статистика заявок (все)</h5>
-        <div class="btn-group">
-            <button class="btn btn-outline-primary btn-sm period-btn" data-period="day">День</button>
-            <button class="btn btn-outline-primary btn-sm period-btn" data-period="week">Неделя</button>
-            <button class="btn btn-outline-primary btn-sm period-btn" data-period="month">Месяц</button>
-        </div>
-    </div>
-        <div style="max-width: 400px; margin: 0 auto;">
-            <canvas id="ticketsChart" width="300" height="150"></canvas>
-        </div>
-</div>
 {% endblock %}
+
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
@@ -72,13 +184,22 @@ function loadChart(period) {
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: ['#ff6384','#36a2eb','#cc65fe','#ffce56','#4bc0c0','#9966ff']
+                        backgroundColor: ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899']
                     }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12 } }
+                    }
                 }
             });
         });
 }
-$('.period-btn').click(function(){ loadChart($(this).data('period')); });
+$('.period-btn').click(function(){
+    $('.period-btn').removeClass('active');
+    $(this).addClass('active');
+    loadChart($(this).data('period'));
+});
 $(document).ready(function(){ loadChart('week'); });
 </script>
 {% endblock %}
