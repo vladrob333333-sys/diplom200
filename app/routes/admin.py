@@ -16,9 +16,15 @@ def dashboard():
         'users': User.query.count(),
         'services': Service.query.count(),
         'tickets': Ticket.query.count(),
-        'open_tickets': Ticket.query.filter(Ticket.status.in_(['new', 'in_progress', 'waiting_client', 'waiting_operator'])).count()
+        'open_tickets': Ticket.query.filter(Ticket.status != 'closed').count()
     }
-    return render_template('admin/dashboard.html', stats=stats)
+    has_backup = False
+    try:
+        from app.routes import admin_backup
+        has_backup = True
+    except ImportError:
+        pass
+    return render_template('admin/dashboard.html', stats=stats, has_backup=has_backup)
 
 @bp.route('/users')
 @login_required
