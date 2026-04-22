@@ -1,11 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app import db
 from app.decorators import role_required
 from app.models import Service, ClientService, Ticket, Message, Attachment
 from app.forms import TicketForm, MessageForm
 from app.utils import save_attachment
-from app.models import Service, ClientService, Ticket, Message, Attachment
 
 bp = Blueprint('client', __name__)
 
@@ -36,7 +35,9 @@ def tickets():
 @role_required('client')
 def create_ticket():
     form = TicketForm()
-    client_services = ClientService.query.filter_by(client_id=current_user.id).join(Service).filter(Service.is_active == True).all()
+    # Получаем активные услуги клиента (гарантируем, что это список, а не None)
+    client_services = ClientService.query.filter_by(client_id=current_user.id)\
+                     .join(Service).filter(Service.is_active == True).all() or []
     form.service_id.choices = [(cs.service.id, cs.service.name) for cs in client_services]
     if form.validate_on_submit():
         ticket = Ticket(
@@ -107,12 +108,10 @@ def ticket_detail(id):
 @role_required('client')
 def order_service(service_id):
     service = Service.query.get_or_404(service_id)
-    # Проверим, не подключена ли уже услуга
     existing = ClientService.query.filter_by(client_id=current_user.id, service_id=service_id).first()
     if existing:
         flash('У вас уже подключена эта услуга.', 'info')
         return redirect(url_for('main.index', _anchor='catalog'))
-    # Создаём заявку на подключение
     ticket = Ticket(
         title=f"Заказ услуги: {service.name}",
         description=f"Клиент заказал подключение услуги \"{service.name}\".",
