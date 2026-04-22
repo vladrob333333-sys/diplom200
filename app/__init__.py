@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -52,12 +53,10 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    login_manager.remember_cookie_duration = app.config['REMEMBER_COOKIE_DURATION']
+    login_manager.session_protection = "strong"
     csrf.init_app(app)
     limiter.init_app(app)
-
-    # Дополнительные настройки LoginManager
-    login_manager.remember_cookie_duration = app.config.get('REMEMBER_COOKIE_DURATION')
-    login_manager.session_protection = "strong"
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -83,6 +82,11 @@ def create_app(config_class=Config):
     app.register_blueprint(api.bp, url_prefix='/api')
     if has_backup:
         app.register_blueprint(admin_backup.bp)
+
+    # Контекстный процессор для отображения текущей даты в шаблонах
+    @app.context_processor
+    def inject_now():
+        return {'now': datetime.utcnow}
 
     @app.errorhandler(403)
     def forbidden(e):
