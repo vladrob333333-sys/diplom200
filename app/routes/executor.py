@@ -20,8 +20,23 @@ def dashboard():
 @login_required
 @role_required('executor')
 def tickets():
-    my = Ticket.query.filter_by(executor_id=current_user.id).order_by(Ticket.created_at.desc()).all()
-    available = Ticket.query.filter_by(executor_id=None).filter(Ticket.status.in_(['new', 'in_progress'])).order_by(Ticket.created_at.desc()).all()
+    filter_type = request.args.get('filter')
+    if filter_type == 'my_active':
+        my = Ticket.query.filter_by(executor_id=current_user.id)\
+                 .filter(Ticket.status != 'closed')\
+                 .order_by(Ticket.created_at.desc()).all()
+        available = []
+    elif filter_type == 'available':
+        my = []
+        available = Ticket.query.filter_by(executor_id=None)\
+                     .filter(Ticket.status.in_(['new', 'in_progress']))\
+                     .order_by(Ticket.created_at.desc()).all()
+    else:
+        my = Ticket.query.filter_by(executor_id=current_user.id)\
+                 .order_by(Ticket.created_at.desc()).all()
+        available = Ticket.query.filter_by(executor_id=None)\
+                     .filter(Ticket.status.in_(['new', 'in_progress']))\
+                     .order_by(Ticket.created_at.desc()).all()
     return render_template('executor/tickets.html', my_tickets=my, available=available)
 
 @bp.route('/tickets/<int:id>/take')
