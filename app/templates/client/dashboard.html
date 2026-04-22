@@ -19,10 +19,14 @@
         transition: transform 0.2s, box-shadow 0.2s;
         height: 100%;
         border-left: 4px solid #10b981;
+        text-decoration: none;
+        color: inherit;
+        display: block;
     }
     .stat-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        color: inherit;
     }
     .stat-value {
         font-size: 3rem;
@@ -75,7 +79,7 @@
         </div>
         <div class="col-md-4 text-md-end">
             <span class="badge bg-light text-dark px-4 py-2 rounded-pill">
-                <i class="fas fa-calendar-alt me-2"></i>{{ now().strftime('%d.%m.%Y') if now else '' }}
+                <i class="fas fa-calendar-alt me-2"></i>{{ now().strftime('%d.%m.%Y') }}
             </span>
         </div>
     </div>
@@ -83,18 +87,16 @@
 
 <div class="row g-4 mb-5">
     <div class="col-md-6">
-        <div class="stat-card">
+        <a href="{{ url_for('client.services') }}" class="stat-card">
             <div class="stat-label"><i class="fas fa-cubes me-2"></i>Мои услуги</div>
             <div class="stat-value">{{ services_count }}</div>
-            <a href="{{ url_for('client.services') }}" class="stretched-link"></a>
-        </div>
+        </a>
     </div>
     <div class="col-md-6">
-        <div class="stat-card">
+        <a href="{{ url_for('client.tickets') }}" class="stat-card">
             <div class="stat-label"><i class="fas fa-ticket-alt me-2"></i>Открытые заявки</div>
             <div class="stat-value">{{ open_tickets }}</div>
-            <a href="{{ url_for('client.tickets') }}" class="stretched-link"></a>
-        </div>
+        </a>
     </div>
 </div>
 
