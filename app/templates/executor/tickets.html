@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Заявки{% endblock %}
 {% block content %}
+{% if my_tickets %}
 <h2>Мои заявки</h2>
 <table class="table table-striped">
     <thead>
@@ -19,7 +20,9 @@
         {% endfor %}
     </tbody>
 </table>
+{% endif %}
 
+{% if available %}
 <h2 class="mt-5" id="available">Доступные заявки</h2>
 <table class="table table-striped">
     <thead>
@@ -41,4 +44,5 @@
         {% endfor %}
     </tbody>
 </table>
+{% endif %}
 {% endblock %}
