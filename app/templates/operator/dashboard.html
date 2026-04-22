@@ -1,63 +1,155 @@
 {% extends "base.html" %}
 {% block title %}Панель оператора{% endblock %}
+{% block styles %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .stat-card {
+        background: white;
+        border: none;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        border-left: 4px solid transparent;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    }
+    .stat-card.clients { border-left-color: #3b82f6; }
+    .stat-card.open { border-left-color: #f59e0b; }
+    .stat-card.my { border-left-color: #10b981; }
+    .stat-value {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-label {
+        color: #64748b;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .quick-action {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 1.5rem;
+    }
+    .chart-container {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .action-btn {
+        display: block;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        color: #1e293b;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background: #f8fafc;
+        border-color: #667eea;
+        color: #667eea;
+    }
+    .welcome-text {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .period-selector .btn {
+        border-radius: 2rem;
+        padding: 0.375rem 1.25rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Панель оператора</h2>
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-header">Клиенты</div>
-            <div class="card-body">
-                <h5 class="card-title">{{ stats.clients }}</h5>
-                <a href="{{ url_for('operator.clients') }}" class="text-white">Управление →</a>
-            </div>
+<div class="dashboard-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="text-white-50 mb-2">Панель оператора</div>
+            <div class="welcome-text">Здравствуйте, {{ current_user.full_name or current_user.username }}!</div>
+            <p class="opacity-75">Управляйте клиентами, заявками и услугами</p>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-header">Открытые заявки</div>
-            <div class="card-body">
-                <h5 class="card-title">{{ stats.open_tickets }}</h5>
-                <a href="{{ url_for('operator.tickets') }}" class="text-white">Просмотр →</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-header">Мои заявки</div>
-            <div class="card-body">
-                <h5 class="card-title">{{ stats.my_tickets }}</h5>
-                <a href="{{ url_for('operator.tickets') }}" class="text-white">Просмотр →</a>
-            </div>
+        <div class="col-md-4 text-md-end">
+            <span class="badge bg-light text-dark px-4 py-2 rounded-pill">
+                <i class="fas fa-calendar-alt me-2"></i>{{ now().strftime('%d.%m.%Y') if now else '' }}
+            </span>
         </div>
     </div>
 </div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="stat-card clients">
+            <div class="stat-label"><i class="fas fa-users me-2"></i>Клиенты</div>
+            <div class="stat-value">{{ stats.clients }}</div>
+            <a href="{{ url_for('operator.clients') }}" class="stretched-link"></a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card open">
+            <div class="stat-label"><i class="fas fa-ticket-alt me-2"></i>Открытые заявки</div>
+            <div class="stat-value">{{ stats.open_tickets }}</div>
+            <a href="{{ url_for('operator.tickets') }}" class="stretched-link"></a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card my">
+            <div class="stat-label"><i class="fas fa-user-check me-2"></i>Мои заявки</div>
+            <div class="stat-value">{{ stats.my_tickets }}</div>
+            <a href="{{ url_for('operator.tickets') }}" class="stretched-link"></a>
+        </div>
+    </div>
+</div>
+
 <div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">Действия</div>
-            <div class="list-group list-group-flush">
-                <a href="{{ url_for('operator.create_client') }}" class="list-group-item list-group-item-action">Зарегистрировать клиента</a>
-                <a href="{{ url_for('operator.tickets') }}" class="list-group-item list-group-item-action">Все заявки</a>
+    <div class="col-lg-5">
+        <div class="quick-action">
+            <h5 class="mb-3"><i class="fas fa-bolt me-2 text-primary"></i>Быстрые действия</h5>
+            <a href="{{ url_for('operator.create_client') }}" class="action-btn">
+                <i class="fas fa-user-plus me-3 text-primary"></i>Зарегистрировать нового клиента
+            </a>
+            <a href="{{ url_for('operator.tickets') }}" class="action-btn">
+                <i class="fas fa-list me-3 text-primary"></i>Все заявки
+            </a>
+            <a href="{{ url_for('operator.clients') }}" class="action-btn">
+                <i class="fas fa-address-book me-3 text-primary"></i>Список клиентов
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Статистика заявок</h5>
+                <div class="period-selector btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary period-btn" data-period="day">День</button>
+                    <button class="btn btn-outline-primary period-btn active" data-period="week">Неделя</button>
+                    <button class="btn btn-outline-primary period-btn" data-period="month">Месяц</button>
+                </div>
             </div>
-        </div>
-    </div>
-</div>
-<div class="card mt-4">
-    <div class="card-header">
-        <h5>Статистика заявок</h5>
-        <div class="btn-group">
-            <button class="btn btn-outline-primary btn-sm period-btn" data-period="day">День</button>
-            <button class="btn btn-outline-primary btn-sm period-btn" data-period="week">Неделя</button>
-            <button class="btn btn-outline-primary btn-sm period-btn" data-period="month">Месяц</button>
-        </div>
-    </div>
-    <div class="card-body">
-        <div style="max-width: 400px; margin: 0 auto;">
-            <canvas id="ticketsChart" width="300" height="150"></canvas>
+            <div style="max-width: 350px; margin: 0 auto;">
+                <canvas id="ticketsChart" width="200" height="200" style="max-height: 220px;"></canvas>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
@@ -76,13 +168,22 @@ function loadChart(period) {
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: ['#ff6384','#36a2eb','#cc65fe','#ffce56','#4bc0c0','#9966ff']
+                        backgroundColor: ['#667eea','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899']
                     }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12 } }
+                    }
                 }
             });
         });
 }
-$('.period-btn').click(function(){ loadChart($(this).data('period')); });
+$('.period-btn').click(function(){
+    $('.period-btn').removeClass('active');
+    $(this).addClass('active');
+    loadChart($(this).data('period'));
+});
 $(document).ready(function(){ loadChart('week'); });
 </script>
 {% endblock %}
