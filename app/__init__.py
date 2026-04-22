@@ -55,6 +55,10 @@ def create_app(config_class=Config):
     csrf.init_app(app)
     limiter.init_app(app)
 
+    # Дополнительные настройки LoginManager
+    login_manager.remember_cookie_duration = app.config.get('REMEMBER_COOKIE_DURATION')
+    login_manager.session_protection = "strong"
+
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     with app.app_context():
@@ -64,7 +68,6 @@ def create_app(config_class=Config):
 
     # Импорт blueprints внутри функции для избежания циклических зависимостей
     from app.routes import auth, main, admin, operator, client, executor, api
-    # admin_backup импортируем отдельно, если файл существует
     try:
         from app.routes import admin_backup
         has_backup = True
