@@ -1,23 +1,263 @@
 {% extends "base.html" %}
-{% block title %}Услуги клиента {{ client.full_name }}{% endblock %}
+{% block title %}Управление услугами клиента{% endblock %}
+{% block styles %}
+<style>
+    .client-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .category-card {
+        margin-bottom: 1.5rem;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .category-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        user-select: none;
+    }
+    .category-header:hover {
+        background-color: #e9ecef;
+    }
+    .category-header h5 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .service-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 1.25rem;
+    }
+    .service-item {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        transition: all 0.2s;
+    }
+    .service-item:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border-color: #667eea;
+    }
+    .service-item .form-check {
+        margin: 0;
+    }
+    .service-item .form-check-input {
+        margin-top: 0.2rem;
+    }
+    .service-item .form-check-label {
+        font-weight: 500;
+        color: #2d3748;
+        cursor: pointer;
+        width: 100%;
+    }
+    .service-description {
+        font-size: 0.875rem;
+        color: #718096;
+        margin-top: 0.5rem;
+        margin-left: 1.8rem;
+    }
+    .action-bar {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        position: sticky;
+        bottom: 1rem;
+    }
+    .search-box {
+        max-width: 400px;
+    }
+    .collapse-icon {
+        transition: transform 0.3s;
+    }
+    .collapsed .collapse-icon {
+        transform: rotate(-90deg);
+    }
+    .stats-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Услуги клиента: {{ client.full_name }} (договор {{ client.contract_number }})</h2>
-<form method="POST">
+<div class="client-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2">{{ client.full_name }}</h1>
+            <div class="d-flex gap-3">
+                <span><i class="fas fa-file-contract me-2"></i>Договор №{{ client.contract_number }}</span>
+                <span><i class="fas fa-envelope me-2"></i>{{ client.email }}</span>
+                <span><i class="fas fa-phone me-2"></i>{{ client.phone or 'Не указан' }}</span>
+            </div>
+        </div>
+        <div class="stats-badge">
+            <i class="fas fa-check-circle me-2"></i>
+            <span id="selected-count">0</span> услуг выбрано
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="search-box">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" id="serviceSearch" class="form-control border-start-0 ps-0" placeholder="Поиск по названию услуги...">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <button class="btn btn-outline-primary me-2" onclick="expandAll()"><i class="fas fa-expand me-2"></i>Развернуть все</button>
+        <button class="btn btn-outline-secondary" onclick="collapseAll()"><i class="fas fa-compress me-2"></i>Свернуть все</button>
+    </div>
+</div>
+
+<form method="POST" id="servicesForm">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <div class="row">
+    
+    <div id="categories-container">
+        {% set grouped = {} %}
         {% for service in services %}
-        <div class="col-md-4 mb-2">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="services" value="{{ service.id }}" id="s{{ service.id }}"
-                       {% if service.id in client_service_ids %}checked{% endif %}>
-                <label class="form-check-label" for="s{{ service.id }}">
-                    {{ service.name }} ({{ service.category.name if service.category else 'Без категории' }})
-                </label>
+            {% set cat = service.category.name if service.category else 'Без категории' %}
+            {% if cat not in grouped %}
+                {% set _ = grouped.update({cat: []}) %}
+            {% endif %}
+            {% set _ = grouped[cat].append(service) %}
+        {% endfor %}
+
+        {% for category_name, cat_services in grouped.items() %}
+        <div class="card category-card" data-category="{{ category_name }}">
+            <div class="category-header" onclick="toggleCategory(this)">
+                <h5>
+                    <i class="fas fa-folder-open me-2"></i>
+                    {{ category_name }}
+                    <span class="badge bg-primary ms-2">{{ cat_services|length }}</span>
+                    <i class="fas fa-chevron-down collapse-icon ms-auto"></i>
+                </h5>
+            </div>
+            <div class="category-body collapse show">
+                <div class="service-grid">
+                    {% for service in cat_services %}
+                    <div class="service-item" data-service-name="{{ service.name|lower }}">
+                        <div class="form-check">
+                            <input class="form-check-input service-checkbox" type="checkbox" name="services" 
+                                   value="{{ service.id }}" id="s{{ service.id }}"
+                                   {% if service.id in client_service_ids %}checked{% endif %}>
+                            <label class="form-check-label" for="s{{ service.id }}">
+                                {{ service.name }}
+                            </label>
+                            {% if service.description %}
+                            <div class="service-description">
+                                {{ service.description|truncate(80) }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
         {% endfor %}
     </div>
-    <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
-    <a href="{{ url_for('operator.clients') }}" class="btn btn-secondary mt-3">Назад</a>
+
+    <div class="action-bar">
+        <button type="submit" class="btn btn-primary btn-lg px-4">
+            <i class="fas fa-save me-2"></i>Сохранить изменения
+        </button>
+        <a href="{{ url_for('operator.clients') }}" class="btn btn-outline-secondary btn-lg px-4">
+            <i class="fas fa-arrow-left me-2"></i>Вернуться к списку клиентов
+        </a>
+        <div class="ms-auto text-muted">
+            <i class="fas fa-info-circle me-2"></i>
+            Отмеченные услуги будут доступны клиенту в личном кабинете
+        </div>
+    </div>
 </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Обновление счётчика выбранных услуг
+    function updateSelectedCount() {
+        const count = document.querySelectorAll('.service-checkbox:checked').length;
+        document.getElementById('selected-count').textContent = count;
+    }
+    
+    // Инициализация счётчика
+    document.querySelectorAll('.service-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+    updateSelectedCount();
+
+    // Поиск по услугам
+    document.getElementById('serviceSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.service-item').forEach(item => {
+            const serviceName = item.dataset.serviceName;
+            const matches = serviceName.includes(query);
+            item.style.display = matches ? '' : 'none';
+            
+            // Показываем/скрываем категорию, если в ней нет видимых услуг
+            const category = item.closest('.category-card');
+            const visibleItems = category.querySelectorAll('.service-item[style=""]').length;
+            category.style.display = visibleItems > 0 ? '' : 'none';
+        });
+    });
+
+    // Сворачивание/разворачивание категорий
+    function toggleCategory(header) {
+        const body = header.nextElementSibling;
+        const icon = header.querySelector('.collapse-icon');
+        body.classList.toggle('show');
+        header.classList.toggle('collapsed');
+    }
+
+    function expandAll() {
+        document.querySelectorAll('.category-body').forEach(body => {
+            body.classList.add('show');
+            body.previousElementSibling.classList.remove('collapsed');
+        });
+    }
+
+    function collapseAll() {
+        document.querySelectorAll('.category-body').forEach(body => {
+            body.classList.remove('show');
+            body.previousElementSibling.classList.add('collapsed');
+        });
+    }
+
+    // Сохраняем состояние свёрнутых категорий в localStorage (опционально)
+    document.querySelectorAll('.category-header').forEach(header => {
+        header.addEventListener('click', function() {
+            const categoryName = this.closest('.category-card').dataset.category;
+            const isCollapsed = !this.nextElementSibling.classList.contains('show');
+            localStorage.setItem(`category_${categoryName}`, isCollapsed);
+        });
+        
+        // Восстановление состояния
+        const categoryName = header.closest('.category-card').dataset.category;
+        const savedState = localStorage.getItem(`category_${categoryName}`);
+        if (savedState === 'true') {
+            header.nextElementSibling.classList.remove('show');
+            header.classList.add('collapsed');
+        }
+    });
+</script>
 {% endblock %}
