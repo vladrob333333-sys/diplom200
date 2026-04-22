@@ -15,6 +15,7 @@ def save_attachment(file):
     return unique_name, file.filename, file_path
 
 def save_image(file):
+    """Сохраняет изображение и возвращает только имя файла."""
     if not file:
         return None
     filename = secure_filename(file.filename)
