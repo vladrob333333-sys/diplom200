@@ -87,13 +87,13 @@
 
 <div class="row g-4 mb-5">
     <div class="col-md-6">
-        <a href="{{ url_for('executor.tickets') }}" class="stat-card">
+        <a href="{{ url_for('executor.tickets', filter='my_active') }}" class="stat-card">
             <div class="stat-label"><i class="fas fa-tasks me-2"></i>Мои заявки (в работе)</div>
             <div class="stat-value">{{ assigned_tickets }}</div>
         </a>
     </div>
     <div class="col-md-6">
-        <a href="{{ url_for('executor.tickets') }}#available" class="stat-card">
+        <a href="{{ url_for('executor.tickets', filter='available') }}" class="stat-card">
             <div class="stat-label"><i class="fas fa-inbox me-2"></i>Доступные заявки</div>
             <div class="stat-value">{{ available_tickets }}</div>
         </a>
