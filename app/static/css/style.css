@@ -2,16 +2,38 @@ html {
     scroll-behavior: smooth;
 }
 body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    background: #f8fafc;
 }
-main {
-    flex: 1;
+/* DataTables кастомизация */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 1rem;
 }
-.chat-box {
-    background-color: #f8f9fa;
+.dataTables_wrapper .dataTables_filter input {
+    border-radius: 2rem !important;
+    padding: 0.4rem 1rem !important;
+    border: 1px solid #e2e8f0 !important;
 }
-.footer {
-    margin-top: auto;
+.dataTables_wrapper .dataTables_length select {
+    border-radius: 2rem !important;
+    padding: 0.3rem 2rem 0.3rem 1rem !important;
+    border: 1px solid #e2e8f0 !important;
+}
+table.dataTable {
+    border-radius: 1rem !important;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+table.dataTable thead th {
+    background: #f1f5f9 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    font-weight: 600;
+}
+.paginate_button.page-item.active .page-link {
+    background: #667eea !important;
+    border-color: #667eea !important;
+}
+.page-link {
+    border-radius: 0.5rem !important;
+    margin: 0 3px;
 }
