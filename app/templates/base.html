@@ -8,74 +8,127 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .navbar-custom {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 0.75rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white !important;
+        }
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .dropdown-item {
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+        }
+        .dropdown-item:hover {
+            background: #f1f5f9;
+        }
+        .user-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            color: white;
+        }
+        footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
     {% block styles %}{% endblock %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Телеком-магазин</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="fas fa-broadcast-tower me-2"></i>Телеком-магазин
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Главная</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#catalog">Каталог</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}"><i class="fas fa-home me-1"></i>Главная</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index', _anchor='catalog') }}"><i class="fas fa-boxes me-1"></i>Каталог</a></li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                {{ current_user.full_name or current_user.username }}
+                            <a class="nav-link dropdown-toggle user-badge" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>{{ current_user.full_name or current_user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 {% if current_user.role == 'admin' %}
-                                    <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Панель администратора</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin.clients') }}">Клиенты</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin.services') }}">Услуги</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Панель администратора</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.users') }}"><i class="fas fa-users-cog me-2"></i>Пользователи</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.services') }}"><i class="fas fa-cogs me-2"></i>Услуги</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.clients') }}"><i class="fas fa-user-tie me-2"></i>Клиенты</a></li>
+                                    <li><hr class="dropdown-divider"></li>
                                 {% elif current_user.role == 'operator' %}
-                                    <li><a class="dropdown-item" href="{{ url_for('operator.dashboard') }}">Панель оператора</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('operator.clients') }}">Клиенты</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('operator.tickets') }}">Заявки</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('operator.dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Панель оператора</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('operator.clients') }}"><i class="fas fa-users me-2"></i>Клиенты</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('operator.tickets') }}"><i class="fas fa-ticket-alt me-2"></i>Заявки</a></li>
+                                    <li><hr class="dropdown-divider"></li>
                                 {% elif current_user.role == 'executor' %}
-                                    <li><a class="dropdown-item" href="{{ url_for('executor.dashboard') }}">Панель исполнителя</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('executor.tickets') }}">Заявки</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('executor.dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Панель исполнителя</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('executor.tickets') }}"><i class="fas fa-tasks me-2"></i>Заявки</a></li>
+                                    <li><hr class="dropdown-divider"></li>
                                 {% else %}
-                                    <li><a class="dropdown-item" href="{{ url_for('client.dashboard') }}">Личный кабинет</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('client.services') }}">Мои услуги</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('client.tickets') }}">Мои заявки</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('client.dashboard') }}"><i class="fas fa-user me-2"></i>Личный кабинет</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('client.services') }}"><i class="fas fa-cube me-2"></i>Мои услуги</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('client.tickets') }}"><i class="fas fa-ticket-alt me-2"></i>Мои заявки</a></li>
+                                    <li><hr class="dropdown-divider"></li>
                                 {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Выйти</a></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Выйти</a></li>
                             </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Вход</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt me-1"></i>Вход</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus me-1"></i>Регистрация</a></li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    
-    <main class="container my-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        {% block content %}{% endblock %}
+    <main class="flex-fill">
+        <div class="container my-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
     </main>
 
-    <footer class="bg-light text-center py-3 mt-auto">
-        <div class="container">
-            <span class="text-muted">&copy; 2026 Телеком-магазин</span>
+    <footer class="py-3 mt-auto">
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2026 Телеком-магазин. Все права защищены.</span>
         </div>
     </footer>
 
