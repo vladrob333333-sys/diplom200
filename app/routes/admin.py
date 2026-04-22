@@ -175,7 +175,11 @@ def edit_category(id):
 @login_required
 @role_required('admin')
 def tickets():
-    tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
+    status_filter = request.args.get('status')
+    query = Ticket.query
+    if status_filter == 'open':
+        query = query.filter(Ticket.status != 'closed')
+    tickets = query.order_by(Ticket.created_at.desc()).all()
     return render_template('admin/tickets.html', tickets=tickets)
 
 # Новые маршруты для управления клиентами и их услугами
