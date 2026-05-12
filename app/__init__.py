@@ -58,6 +58,7 @@ def create_app(config_class=Config):
     csrf.init_app(app)
     limiter.init_app(app)
 
+    # Создание папки uploads
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     with app.app_context():
