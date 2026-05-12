@@ -20,11 +20,11 @@ class Config:
     ITEMS_PER_PAGE = 20
 
     # Настройки сессий и куки
-    PERMANENT_SESSION_LIFETIME = timedelta(hours=12)  # время жизни постоянной сессии
-    SESSION_COOKIE_SECURE = True   # передавать куки только по HTTPS
-    SESSION_COOKIE_HTTPONLY = True # запретить доступ к куки из JavaScript
-    SESSION_COOKIE_SAMESITE = 'Lax'  # защита от CSRF
-    REMEMBER_COOKIE_DURATION = timedelta(days=30)  # время жизни куки "запомнить меня"
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    REMEMBER_COOKIE_DURATION = timedelta(days=30)
     REMEMBER_COOKIE_SECURE = True
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_SAMESITE = 'Lax'
