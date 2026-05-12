@@ -16,7 +16,7 @@ def dashboard():
         'users': User.query.count(),
         'services': Service.query.count(),
         'tickets': Ticket.query.count(),
-        'open_tickets': Ticket.query.filter(Ticket.status != 'closed').count()
+        'open_tickets': Ticket.query.filter(Ticket.status.in_(['new', 'in_progress', 'waiting_client', 'waiting_operator'])).count()
     }
     has_backup = False
     try:
@@ -188,7 +188,6 @@ def tickets():
     tickets = query.order_by(Ticket.created_at.desc()).all()
     return render_template('admin/tickets.html', tickets=tickets)
 
-# Новые маршруты для управления клиентами и их услугами
 @bp.route('/clients')
 @login_required
 @role_required('admin')
