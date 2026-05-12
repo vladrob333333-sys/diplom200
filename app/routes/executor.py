@@ -71,9 +71,16 @@ def ticket_detail(id):
         if attachments:
             for file in attachments:
                 if file:
-                    uname, oname, path = save_attachment(file)
-                    if uname:
-                        db.session.add(Attachment(filename=uname, original_name=oname, file_path=path, message_id=msg.id))
+                    unique_name, original_name, mimetype, file_data = save_attachment(file)
+                    if unique_name and file_data:
+                        attachment = Attachment(
+                            filename=unique_name,
+                            original_name=original_name,
+                            file_mimetype=mimetype,
+                            file_data=file_data,
+                            message_id=msg.id
+                        )
+                        db.session.add(attachment)
         db.session.commit()
         flash('Сообщение отправлено.', 'success')
         return redirect(url_for('executor.ticket_detail', id=ticket.id))
