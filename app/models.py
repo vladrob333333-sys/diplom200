@@ -51,7 +51,8 @@ class Service(db.Model):
     description = db.Column(db.Text)
     price = db.Column(db.Float)
     is_active = db.Column(db.Boolean, default=True)
-    image_url = db.Column(db.String(500))
+    image_data = db.Column(db.LargeBinary, nullable=True)  # бинарные данные изображения
+    image_mimetype = db.Column(db.String(50), nullable=True)  # MIME-тип изображения
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     category = db.relationship('Category', back_populates='services')
     client_services = db.relationship('ClientService', back_populates='service', lazy='dynamic')
@@ -81,7 +82,6 @@ class Ticket(db.Model):
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     executor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=True)
-    created_by_operator = db.Column(db.Boolean, default=False)  # новое поле
 
     client = db.relationship('User', foreign_keys=[client_id], back_populates='created_tickets')
     operator = db.relationship('User', foreign_keys=[operator_id], back_populates='assigned_tickets')
@@ -109,6 +109,8 @@ class Attachment(db.Model):
     filename = db.Column(db.String(255), nullable=False)
     original_name = db.Column(db.String(255))
     file_path = db.Column(db.String(500))
+    file_data = db.Column(db.LargeBinary, nullable=True)  # бинарные данные файла
+    file_mimetype = db.Column(db.String(50), nullable=True)  # MIME-тип файла
     ticket_id = db.Column(db.Integer, db.ForeignKey('tickets.id'), nullable=True)
     message_id = db.Column(db.Integer, db.ForeignKey('messages.id'), nullable=True)
     uploaded_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
