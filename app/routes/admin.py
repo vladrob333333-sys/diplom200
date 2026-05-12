@@ -108,9 +108,10 @@ def create_service():
             is_active=form.is_active.data
         )
         if form.image.data:
-            image_name = save_image(form.image.data)
-            if image_name:
-                service.image_url = image_name
+            mimetype, file_data = save_image(form.image.data)
+            if mimetype and file_data:
+                service.image_mimetype = mimetype
+                service.image_data = file_data
         db.session.add(service)
         db.session.commit()
         flash('Услуга создана.', 'success')
@@ -130,9 +131,10 @@ def edit_service(id):
         service.category_id = form.category_id.data
         service.is_active = form.is_active.data
         if form.image.data:
-            image_name = save_image(form.image.data)
-            if image_name:
-                service.image_url = image_name
+            mimetype, file_data = save_image(form.image.data)
+            if mimetype and file_data:
+                service.image_mimetype = mimetype
+                service.image_data = file_data
         db.session.commit()
         flash('Услуга обновлена.', 'success')
         return redirect(url_for('admin.services'))
