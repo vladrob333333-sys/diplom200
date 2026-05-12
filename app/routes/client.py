@@ -35,6 +35,7 @@ def tickets():
 @role_required('client')
 def create_ticket():
     form = TicketForm()
+    # Получаем активные услуги клиента (гарантируем, что это список, а не None)
     client_services = ClientService.query.filter_by(client_id=current_user.id)\
                      .join(Service).filter(Service.is_active == True).all() or []
     form.service_id.choices = [(cs.service.id, cs.service.name) for cs in client_services]
@@ -53,13 +54,12 @@ def create_ticket():
         if attachments:
             for file in attachments:
                 if file:
-                    unique_name, original_name, mimetype, file_data = save_attachment(file)
-                    if unique_name and file_data:
+                    unique_name, original_name, file_path = save_attachment(file)
+                    if unique_name:
                         attachment = Attachment(
                             filename=unique_name,
                             original_name=original_name,
-                            file_mimetype=mimetype,
-                            file_data=file_data,
+                            file_path=file_path,
                             ticket_id=ticket.id
                         )
                         db.session.add(attachment)
@@ -87,13 +87,12 @@ def ticket_detail(id):
         if attachments:
             for file in attachments:
                 if file:
-                    unique_name, original_name, mimetype, file_data = save_attachment(file)
-                    if unique_name and file_data:
+                    unique_name, original_name, file_path = save_attachment(file)
+                    if unique_name:
                         attachment = Attachment(
                             filename=unique_name,
                             original_name=original_name,
-                            file_mimetype=mimetype,
-                            file_data=file_data,
+                            file_path=file_path,
                             message_id=message.id
                         )
                         db.session.add(attachment)

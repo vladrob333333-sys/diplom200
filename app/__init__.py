@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from flask import Flask, render_template, send_file
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -9,7 +9,6 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import Config
 from sqlalchemy import inspect, text
-import io
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -59,7 +58,7 @@ def create_app(config_class=Config):
     csrf.init_app(app)
     limiter.init_app(app)
 
-    # Создание папки uploads для временных файлов (больше не используется для хранения)
+    # Создание папки uploads
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     with app.app_context():
@@ -84,39 +83,6 @@ def create_app(config_class=Config):
     app.register_blueprint(api.bp, url_prefix='/api')
     if has_backup:
         app.register_blueprint(admin_backup.bp)
-
-    # Маршрут для отдачи изображений услуг из БД
-    @app.route('/service_image/<int:service_id>')
-    def service_image(service_id):
-        from app.models import Service
-        service = Service.query.get_or_404(service_id)
-        if service.image_data and service.image_mimetype:
-            return send_file(
-                io.BytesIO(service.image_data),
-                mimetype=service.image_mimetype,
-                as_attachment=False,
-                download_name=f'image_{service_id}'
-            )
-        # Возвращаем заглушку, если изображения нет
-        return '', 404
-
-    # Маршрут для отдачи вложений из БД
-    @app.route('/attachment/<int:attachment_id>')
-    def attachment_file(attachment_id):
-        from app.models import Attachment
-        attachment = Attachment.query.get_or_404(attachment_id)
-        if attachment.file_data and attachment.file_mimetype:
-            return send_file(
-                io.BytesIO(attachment.file_data),
-                mimetype=attachment.file_mimetype,
-                as_attachment=True,
-                download_name=attachment.original_name or attachment.filename
-            )
-        # Если данных в БД нет, пробуем отдать файл с диска
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], attachment.filename)
-        if os.path.exists(file_path):
-            return send_file(file_path, as_attachment=True, download_name=attachment.original_name or attachment.filename)
-        return '', 404
 
     # Контекстный процессор для отображения текущей даты в шаблонах
     @app.context_processor
