@@ -16,7 +16,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Пожалуйста, войдите для доступа к этой странице.'
 csrf = CSRFProtect()
-limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
+limiter = Limiter(key_func=get_remote_address, default_limits=["2000 per day", "500 per hour"])
 
 def apply_migrations():
     """Автоматически применяет миграции Alembic."""
